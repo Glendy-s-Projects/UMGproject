@@ -3,7 +3,7 @@ import React from "react";
 
 type VideoItemsProps = {
   videoItems: {
-    id?: number;
+    //id?: number;
     $id?: string;
     title?: string;
     name?: string;
@@ -16,7 +16,7 @@ const VideoCards = ({ videoItems }: VideoItemsProps) => {
   return (
     <div className="flex flex-wrap gap-8  justify-center">
       {videoItems.map((video) => {
-        const videoId = video.$id || video.id?.toString() || '';
+        const videoId = video.$id || '';
         const videoTitle = video.name || video.title || '';
         const videoUrl = video.youtubeCode || video.url || '';
         

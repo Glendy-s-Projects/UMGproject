@@ -69,15 +69,15 @@ const LoginPage = () => {
     }
   };
 
-  const register = async () => {
-    await account.create({
-      userId: ID.unique(),
-      email,
-      password,
-      name,
-    });
-    login(email, password);
-  };
+  // const register = async () => {
+  //   await account.create({
+  //     userId: ID.unique(),
+  //     email,
+  //     password,
+  //     name,
+  //   });
+  //   login(email, password);
+  // };
 
   const logout = async () => {
     await account.deleteSession({ sessionId: "current" });
