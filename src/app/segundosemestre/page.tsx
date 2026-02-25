@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import TitleCourse from "@/components/TitleCourse";
 import { cursos } from "@/utils/data/routes";
 import Image from "next/image";
@@ -7,10 +7,12 @@ import React from "react";
 
 const SegundoSemestre = () => {
   return (
-    <section className="min-h-screen flex flex-col items-center justify-between gap-2 p-4">
-
+    <section
+      className="min-h-screen flex flex-col items-center p-4 "
+    >
       <TitleCourse course="Segundo Semestre" />
-      <div className="flex flex-wrap max-sm:flex-col items-center justify-center gap-6   ">
+
+      <div className="flex flex-row h-full max-sm:flex-col items-center justify-center gap-2   ">
         {cursos.map((route) => (
           <Link
             key={route.id}
