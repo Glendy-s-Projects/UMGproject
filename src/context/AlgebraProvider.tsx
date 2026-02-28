@@ -26,7 +26,7 @@ const AlgebraContext = createContext<AlgebraContextType>(null!);
 const AlgebraProvider = ({ children }: ProviderProps) => {
   const [size, setSize] = useState(3);
   const [matrix, setMatrix] = useState<string[][]>(
-    Array.from({ length: 3 }, () => Array(4).fill("0"))
+    Array.from({ length: 3 }, () => Array(4).fill("0")),
   );
   const [steps, setSteps] = useState<string[]>([]);
   const [solution, setSolution] = useState<Fraction[] | null>(null);
@@ -44,7 +44,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
 
   const solve = () => {
     const m: FractionMatrix = matrix.map((row) =>
-      row.map((v) => new Fraction(v))
+      row.map((v) => new Fraction(v)),
     );
     const n = size;
     const stepLog: string[] = [];
@@ -151,9 +151,9 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
           .map((val, idx) =>
             idx === row.length - 2
               ? formatNumber(val) + " |"
-              : formatNumber(val)
+              : formatNumber(val),
           )
-          .join("\t")
+          .join("\t"),
       )
       .join("\n");
   };
@@ -276,7 +276,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     if (n === 1) return `${m[0][0]}`;
     if (n === 2)
       return `${m[0][0]}*${m[1][1]} - ${m[0][1]}*${m[1][0]} = ${determinant(
-        m
+        m,
       ).toFraction(false)}`;
     if (n === 3) {
       const a = new Fraction(m[0][0]).mul(m[1][1]).mul(m[2][2]);
@@ -286,11 +286,11 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       const e = new Fraction(m[0][0]).mul(m[1][2]).mul(m[2][1]);
       const f = new Fraction(m[0][1]).mul(m[1][0]).mul(m[2][2]);
       return `(${a.toFraction(false)}) + (${b.toFraction(
-        false
+        false,
       )}) + (${c.toFraction(false)}) - (${d.toFraction(
-        false
+        false,
       )}) - (${e.toFraction(false)}) - (${f.toFraction(false)}) = ${determinant(
-        m
+        m,
       ).toFraction(false)}`;
     }
     // 4x4+
@@ -308,7 +308,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
   const solve3 = () => {
     const coeffs: Matrix = matrix3.map((row) => row.slice(0, size2));
     const constants: Fraction[] = matrix3.map(
-      (row) => new Fraction(row[size2])
+      (row) => new Fraction(row[size2]),
     );
 
     const det = determinant(coeffs);
@@ -322,7 +322,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
 
     for (let i = 0; i < size2; i++) {
       const modified: Matrix = coeffs.map((row, r) =>
-        row.map((val, c) => (c === i ? constants[r] : val))
+        row.map((val, c) => (c === i ? constants[r] : val)),
       );
       const detVar = determinant(modified);
       detVars.push(detVar);
@@ -335,7 +335,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
   const handleChange3 = (
     e: React.ChangeEvent<HTMLInputElement>,
     row: number,
-    col: number
+    col: number,
   ) => {
     const newMatrix = [...matrix3];
     newMatrix[row][col] = Number(e.target.value);
@@ -345,7 +345,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
   const handleSizeChange3 = (newSize: number) => {
     setSize2(newSize);
     const newMatrix: Matrix = Array.from({ length: newSize }, () =>
-      Array(newSize + 1).fill(0)
+      Array(newSize + 1).fill(0),
     );
     setMatrix3(newMatrix);
     setResult(null);
@@ -369,7 +369,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
   const handleChange4 = (
     e: React.ChangeEvent<HTMLInputElement>,
     row: number,
-    col: number
+    col: number,
   ) => {
     const newMatrix = [...matrix4];
     newMatrix[row][col] = parseInt(e.target.value);
@@ -387,7 +387,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
 
   const calculateDet = (
     m: number[][],
-    showSteps = false
+    showSteps = false,
   ): number | { value: number; steps: string | MinorStep[] } => {
     const n = m.length;
     if (n === 2) {
@@ -514,7 +514,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     .map((_, i) =>
       Array(size4)
         .fill(0)
-        .map((_, j) => ((i + j) % 2 === 0 ? "+" : "-"))
+        .map((_, j) => ((i + j) % 2 === 0 ? "+" : "-")),
     );
 
   //----------------- Vectores ----------------//;
@@ -526,7 +526,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
   /* Parse cardinal formats like: "N 60 O", "E 30 N", or direct degrees "30" */
   const parseCardinal = useCallback(
     (
-      input: string
+      input: string,
     ): {
       angleDeg: number;
       parsed: boolean;
@@ -549,8 +549,8 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         let angleFromEast = 0;
         if (ns === "N" && eo === "E") angleFromEast = 90 - ang;
         if (ns === "N" && eo === "O") angleFromEast = 90 + ang;
-        if (ns === "S" && eo === "E") angleFromEast = 270 - ang;
-        if (ns === "S" && eo === "O") angleFromEast = 270 + ang;
+        if (ns === "S" && eo === "E") angleFromEast = 270 + ang;
+        if (ns === "S" && eo === "O") angleFromEast = 270 - ang;
         return {
           angleDeg: norm360(angleFromEast),
           parsed: true,
@@ -580,7 +580,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
           "No se pudo interpretar. Use grados (ej. 30) o cardinal (ej. N 60 O).",
       };
     },
-    [norm360]
+    [norm360],
   );
 
   const polarToComponentsSteps = useCallback(
@@ -602,23 +602,23 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         <div key="step4" className="flex flex-col">
           <InlineMath math={`V_x  = ${m} \\cdot \\cos(${angleDeg}^\\circ) `} />
           <InlineMath math={`V_x  = ${x.toFixed(2)}`} />
-        </div>
+        </div>,
       );
       steps.push(
         <div key="step4b" className="flex flex-col">
           <InlineMath math={`V_y = ${m} \\cdot \\sin(${angleDeg}^\\circ) `} />
           <InlineMath math={`V_y  = ${y.toFixed(2)}`} />
-        </div>
+        </div>,
       );
       steps.push(
         <div key="step5">
           Resultado:{" "}
           <InlineMath math={`V = (${x.toFixed(2)},\\; ${y.toFixed(2)})`} />
-        </div>
+        </div>,
       );
       return { steps, x, y };
     },
-    [parseCardinal, deg2rad]
+    [parseCardinal, deg2rad],
   );
 
   function componentsToPolarSteps(xStr: string, yStr: string) {
@@ -637,7 +637,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         <InlineMath math={`|V| = \\sqrt{${x2} + ${y2}}`} />
         <InlineMath math={`|V| = \\sqrt{${sumSquares}}`} />
         <InlineMath math={`|V| = ${mag.toFixed(2)}`} />
-      </div>
+      </div>,
     );
     const angleRad = Math.atan2(y, x);
     const angleDeg = norm360(rad2deg(angleRad));
@@ -649,87 +649,195 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     const fracDisplay =
       absX === 0 ? "\\infty" : `\\frac{${absYFmt}}{${absXFmt}}`;
     const angleLatex = `\\theta = \\operatorname\\arctan(\\frac{V_y}{V_x}) \\ = \\operatorname\\arctan\\left(${fracDisplay}\\right) \\ = \\ ${angleDeg.toFixed(
-      2
+      2,
     )}^\\circ`;
     steps.push(
       <div key="step3">
         <InlineMath math={angleLatex} />
-      </div>
+      </div>,
     );
     return { steps, mag, angleDeg };
   }
 
   function sumVectorsSteps(
-    vecs: { x?: string; y?: string; mag?: string; angle?: string }[]
+    vecs: { x?: string; y?: string; mag?: string; angle?: string }[],
   ) {
     const steps: JSX.Element[] = [];
     let sumX = 0;
     let sumY = 0;
+    const vectorData: Array<{
+      x: number;
+      y: number;
+      cosSteps: JSX.Element[];
+      sinSteps: JSX.Element[];
+      result: JSX.Element;
+    }> = [];
+
     vecs.forEach((v, i) => {
       if (v.x !== undefined && v.y !== undefined && v.x !== "" && v.y !== "") {
         const xv = parseFloat(v.x);
         const yv = parseFloat(v.y);
         sumX += xv;
         sumY += yv;
+        vectorData.push({
+          x: xv,
+          y: yv,
+          cosSteps: [<InlineMath key="x" math={`V_x = ${xv.toFixed(2)}`} />],
+          sinSteps: [<InlineMath key="y" math={`V_y = ${yv.toFixed(2)}`} />],
+          result: (
+            <InlineMath math={`V = (${xv.toFixed(2)},\\; ${yv.toFixed(2)})`} />
+          ),
+        });
       } else if (
         v.mag !== undefined &&
         v.angle !== undefined &&
         v.mag !== "" &&
         v.angle !== ""
       ) {
-        const { steps: s2, x, y } = polarToComponentsSteps(v.mag, v.angle);
-        s2.forEach((t, j) => steps.push(<div key={`vec${i}-${j}`}> {t}</div>));
-        sumX += x;
-        sumY += y;
+        const m = parseFloat(v.mag);
+        const parsed = parseCardinal(v.angle);
+        if (parsed.parsed) {
+          const angleDeg = parsed.angleDeg;
+          const rad = deg2rad(angleDeg);
+          const x = m * Math.cos(rad);
+          const y = m * Math.sin(rad);
+          sumX += x;
+          sumY += y;
+          vectorData.push({
+            x,
+            y,
+            cosSteps: [
+              <InlineMath
+                key="cos1"
+                math={`V_x = ${m} \\cdot \\cos(${angleDeg}^\\circ)`}
+              />,
+              <InlineMath key="cos2" math={`V_x = ${x.toFixed(2)}`} />,
+            ],
+            sinSteps: [
+              <InlineMath
+                key="sin1"
+                math={`V_y = ${m} \\cdot \\sin(${angleDeg}^\\circ)`}
+              />,
+              <InlineMath key="sin2" math={`V_y = ${y.toFixed(2)}`} />,
+            ],
+            result: (
+              <InlineMath math={`V = (${x.toFixed(2)},\\; ${y.toFixed(2)})`} />
+            ),
+          });
+        }
       } else {
         steps.push(
-          <div key={`vec${i}`}>- Vector {i + 1}: formato no reconocido.</div>
+          <div key={`vec${i}`}>- Vector {i + 1}: formato no reconocido.</div>,
         );
       }
     });
+
+    // Mostrar en formato de tabla (row)
+    if (vectorData.length > 0) {
+      steps.push(
+        <div
+          key="table"
+          className="grid gap-4"
+          style={{ gridTemplateColumns: `repeat(${vectorData.length}, 1fr)` }}
+        >
+          {vectorData.map((data, i) => (
+            <div
+              key={`vec${i}`}
+              className="flex flex-col gap-2 border p-2 rounded"
+            >
+              <div className="font-bold">Vector {i + 1}</div>
+              <div className="flex flex-col">{data.cosSteps}</div>
+              <div className="flex flex-col">{data.sinSteps}</div>
+              <div>{data.result}</div>
+            </div>
+          ))}
+        </div>,
+      );
+    }
+
+    const mag = Math.hypot(sumX, sumY);
+    const angleDeg = norm360(rad2deg(Math.atan2(sumY, sumX)));
+
+    steps.push(<div key="separator" className="border-t-2 my-4" />);
+
     steps.push(
       <div key="sum" className="flex flex-col">
         <InlineMath math={`\\Sigma V_x = ${sumX.toFixed(2)}`} />
-        <InlineMath math={` \\Sigma V_y = ${sumY.toFixed(2)}`} />
-      </div>
+        <InlineMath math={`\\Sigma V_y = ${sumY.toFixed(2)}`} />
+      </div>,
     );
-    const mag = Math.hypot(sumX, sumY);
-    const angleDeg = norm360(rad2deg(Math.atan2(sumY, sumX)));
+
     steps.push(
       <div key="result">
-        3) Resultante:{" "}
+        Resultante:{" "}
         <InlineMath math={`R = (${sumX.toFixed(2)},\\; ${sumY.toFixed(2)})`} />
-      </div>
+      </div>,
     );
+
     steps.push(
       <div key="mag" className="flex flex-col">
         <InlineMath
-          math={`|R| = \\sqrt{${sumX.toFixed(2)}^2 + ${sumY.toFixed(2)}^2} `}
+          math={`|R| = \\sqrt{${sumX.toFixed(2)}^2 + ${sumY.toFixed(2)}^2}`}
         />
         <InlineMath math={`|R| = ${mag.toFixed(2)}`} />
-      </div>
+      </div>,
     );
+
+    // Determinar cuadrante y calcular ángulo
+    const baseAngle = rad2deg(Math.atan(Math.abs(sumY) / Math.abs(sumX)));
+    let quadrant = "";
+    let angleCalc = "";
+    
+    if (sumX > 0 && sumY > 0) {
+      quadrant = "Cuadrante I (x>0, y>0)";
+      angleCalc = `\\theta = ${baseAngle.toFixed(2)}^\\circ`;
+    } else if (sumX < 0 && sumY > 0) {
+      quadrant = "Cuadrante II (x<0, y>0)";
+      angleCalc = `\\theta = 180^\\circ - ${baseAngle.toFixed(2)}^\\circ = ${angleDeg.toFixed(2)}^\\circ`;
+    } else if (sumX < 0 && sumY < 0) {
+      quadrant = "Cuadrante III (x<0, y<0)";
+      angleCalc = `\\theta = 180^\\circ + ${baseAngle.toFixed(2)}^\\circ = ${angleDeg.toFixed(2)}^\\circ`;
+    } else if (sumX > 0 && sumY < 0) {
+      quadrant = "Cuadrante IV (x>0, y<0)";
+      angleCalc = `\\theta = 360^\\circ - ${baseAngle.toFixed(2)}^\\circ = ${angleDeg.toFixed(2)}^\\circ`;
+    } else if (sumX === 0 && sumY > 0) {
+      quadrant = "Eje Y positivo";
+      angleCalc = `\\theta = 90^\\circ`;
+    } else if (sumX === 0 && sumY < 0) {
+      quadrant = "Eje Y negativo";
+      angleCalc = `\\theta = 270^\\circ`;
+    } else if (sumY === 0 && sumX > 0) {
+      quadrant = "Eje X positivo";
+      angleCalc = `\\theta = 0^\\circ`;
+    } else if (sumY === 0 && sumX < 0) {
+      quadrant = "Eje X negativo";
+      angleCalc = `\\theta = 180^\\circ`;
+    }
+
     steps.push(
-      <div key="angle">
-        5) <InlineMath math={`\\theta = ${angleDeg.toFixed(2)}^\\circ`} />
-      </div>
+      <div key="angle" className="flex flex-col gap-1">
+        <InlineMath
+          math={`\\theta_{ref} = \\arctan\\left(\\frac{|R_y|}{|R_x|}\\right) = \\arctan\\left(\\frac{${Math.abs(sumY).toFixed(2)}}{${Math.abs(sumX).toFixed(2)}}\\right) = ${baseAngle.toFixed(2)}^\\circ`}
+        />
+        <div className="text-sm">{quadrant}</div>
+        <InlineMath math={angleCalc} />
+      </div>,
     );
+
     steps.push(
       <div key="polar">
-        6) Resultado polar:{" "}
+        Resultado polar:{" "}
         <InlineMath
-          math={`|R|=${mag.toFixed(2)},\\; \\theta=${angleDeg.toFixed(
-            2
-          )}^\\circ`}
+          math={`R = ${mag.toFixed(2)} = \\theta ${angleDeg.toFixed(2)}^\\circ`}
         />
-      </div>
+      </div>,
     );
     return { steps, sumX, sumY, mag, angleDeg };
   }
 
   function scalarMultiplySteps(
     sStr: string,
-    v: { x?: string; y?: string; mag?: string; angle?: string }
+    v: { x?: string; y?: string; mag?: string; angle?: string },
   ) {
     const steps: JSX.Element[] = [];
     const s = parseFloat(sStr);
@@ -739,20 +847,20 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       steps.push(
         <div key="vector">
           2) Vector: <InlineMath math={`${x},\\; ${y}`} />
-        </div>
+        </div>,
       );
       const xr = s * x;
       const yr = s * y;
       steps.push(
         <div key="multiply">
           3) <InlineMath math={`${s} \\cdot (${x}, ${y}) = (${xr}, ${yr})`} />
-        </div>
+        </div>,
       );
       steps.push(
         <div key="result">
           4) Resultado:{" "}
           <InlineMath math={`${xr.toFixed(2)},\\; ${yr.toFixed(2)}`} />
-        </div>
+        </div>,
       );
       return { steps, xr, yr };
     } else if (
@@ -770,13 +878,13 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         <div key="newmag" className="flex flex-col">
           Magnitud nueva: <InlineMath math={`|V| = ${s} \\cdot ${m} `} />
           <InlineMath math={`|V| = ${Math.abs(s * m)}   `} />
-        </div>
+        </div>,
       );
       steps.push(
         <div key="result">
           4) Resultado en componentes:{" "}
           <InlineMath math={`${xr.toFixed(2)},\\; ${yr.toFixed(2)}`} />
-        </div>
+        </div>,
       );
       return { steps, xr, yr };
     }
@@ -786,12 +894,12 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
 
   function angleBetweenSteps(
     a: { x?: string; y?: string; mag?: string; angle?: string },
-    b: { x?: string; y?: string; mag?: string; angle?: string }
+    b: { x?: string; y?: string; mag?: string; angle?: string },
   ) {
     const steps: JSX.Element[] = [];
     function ensureComponents(
       v: { x?: string; y?: string; mag?: string; angle?: string },
-      idx: number
+      idx: number,
     ) {
       if (v.x !== undefined && v.y !== undefined && v.x !== "" && v.y !== "")
         return {
@@ -829,11 +937,11 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       <div key="dotcalc" className="flex flex-col">
         <InlineMath
           math={`A\\cdot B = (${A.x.toFixed(2)}\\cdot ${B.x.toFixed(
-            2
+            2,
           )}) + (${A.y.toFixed(2)}\\cdot ${B.y.toFixed(2)})`}
         />
         <InlineMath math={`A\\cdot B = ${dot.toFixed(2)}`} />
-      </div>
+      </div>,
     );
 
     const magA = Math.hypot(A.x, A.y);
@@ -873,7 +981,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
           <InlineMath math={`|B| = \\sqrt{${sumB}}`} />
           <InlineMath math={`|B| = ${magB.toFixed(2)}`} />
         </div>
-      </div>
+      </div>,
     );
     const cosTheta = dot / (magA * magB);
     const cosClamped = Math.max(-1, Math.min(1, cosTheta));
@@ -883,15 +991,15 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         4)
         <InlineMath
           math={`\\cos\\theta = \\frac{${dot.toFixed(2)}}{${magA.toFixed(
-            2
+            2,
           )}\\cdot ${magB.toFixed(2)}} =  ${cosClamped.toFixed(2)}`}
         />
         <InlineMath
           math={`\\theta = \\arccos(${cosClamped.toFixed(
-            2
+            2,
           )}) = ${thetaDeg.toFixed(2)}^\\circ`}
         />
-      </div>
+      </div>,
     );
     return { steps, thetaDeg };
   }
@@ -927,7 +1035,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       return { steps };
     }
     A!.steps.forEach((t: JSX.Element, i: number) =>
-      steps.push(<div key={`A${i}`}> {t}</div>)
+      steps.push(<div key={`A${i}`}> {t}</div>),
     );
     const mag = Math.hypot(A!.x, A!.y);
     // Guard against zero magnitude
@@ -935,7 +1043,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       steps.push(
         <div key="zeromag">
           2) Vector de magnitud cero; no existe vector unitario.
-        </div>
+        </div>,
       );
       return { steps };
     }
@@ -957,7 +1065,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
           <InlineMath math={`|A| = \\sqrt{${sumA}}`} />
           <InlineMath math={` |A|= ${mag.toFixed(2)}`} />
         </div>
-      </div>
+      </div>,
     );
     const ux = A!.x / mag;
     const uy = A!.y / mag;
@@ -966,13 +1074,13 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         3) Vector unitario:{" "}
         <InlineMath
           math={`|V| = \\frac{(${A!.x.toFixed(2)} + \\; ${A!.y.toFixed(
-            2
+            2,
           )})}{${mag.toFixed(2)}}`}
         />
         <InlineMath
           math={`\\hat{u} = (${ux.toFixed(6)},\\; ${uy.toFixed(6)})`}
         />
-      </div>
+      </div>,
     );
     return { steps, ux, uy };
   }
@@ -1005,11 +1113,11 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         ctx.moveTo(toX, toY);
         ctx.lineTo(
           toX - headlen * Math.cos(angle - Math.PI / 6),
-          toY - headlen * Math.sin(angle - Math.PI / 6)
+          toY - headlen * Math.sin(angle - Math.PI / 6),
         );
         ctx.lineTo(
           toX - headlen * Math.cos(angle + Math.PI / 6),
-          toY - headlen * Math.sin(angle + Math.PI / 6)
+          toY - headlen * Math.sin(angle + Math.PI / 6),
         );
         ctx.closePath();
         ctx.fillStyle = dataset.arrowColor || dataset.borderColor || "black";
@@ -1047,7 +1155,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       }
       return null;
     },
-    [polarToComponentsSteps]
+    [polarToComponentsSteps],
   );
 
   // Getters and setters for individual states based on vectors
@@ -1148,6 +1256,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     if (mode2 === "sum-vectors" || mode2 === "subtract-vectors") {
       const v1 = vecToXY(vectors[0] || {});
       const v2 = vecToXY(vectors[1] || {});
+      const v3 = vecToXY(vectors[2] || {});
       if (v1) {
         datasets.push({
           label: "V1",
@@ -1180,7 +1289,23 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         xs.push(v2.x);
         ys.push(v2.y);
       }
-      if (v1 && v2) {
+      if (v3) {
+        datasets.push({
+          label: "V3",
+          data: [
+            { x: 0, y: 0 },
+            { x: v3.x, y: v3.y },
+          ],
+          drawArrow: true,
+          arrowColor: "purple",
+          borderColor: "purple",
+          borderWidth: 2,
+          pointRadius: 0,
+        });
+        xs.push(v3.x);
+        ys.push(v3.y);
+      }
+      if (v1 && v2 && v3) {
         const rx = v1.x + (mode2 === "subtract-vectors" ? -v2.x : v2.x);
         const ry = v1.y + (mode2 === "subtract-vectors" ? -v2.y : v2.y);
         datasets.push({
@@ -1341,12 +1466,12 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     if (mode2 === "polar-to-components")
       resSteps = polarToComponentsSteps(
         vectors[0]?.mag || "",
-        vectors[0]?.angle || ""
+        vectors[0]?.angle || "",
       ).steps;
     else if (mode2 === "components-to-polar")
       resSteps = componentsToPolarSteps(
         vectors[1]?.x || "",
-        vectors[1]?.y || ""
+        vectors[1]?.y || "",
       ).steps;
     else if (mode2 === "sum-vectors") resSteps = sumVectorsSteps(vectors).steps;
     else if (mode2 === "subtract-vectors") {
@@ -1463,10 +1588,10 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
 
   // Magnitudes
   const mag1 = Math.sqrt(
-    parsedPointP.x ** 2 + parsedPointP.y ** 2 + parsedPointP.z ** 2
+    parsedPointP.x ** 2 + parsedPointP.y ** 2 + parsedPointP.z ** 2,
   );
   const mag2 = Math.sqrt(
-    parsedDistP2.x ** 2 + parsedDistP2.y ** 2 + parsedDistP2.z ** 2
+    parsedDistP2.x ** 2 + parsedDistP2.y ** 2 + parsedDistP2.z ** 2,
   );
 
   // Distancia
@@ -1515,7 +1640,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
 
   const angleSteps = [
     `\\cos(\\theta) = \\frac{\\vec{u} \\cdot \\vec{v}}{|\\vec{u}||\\vec{v}|} = \\frac{${dotProduct}}{${mag1.toFixed(
-      2
+      2,
     )} \\times ${mag2.toFixed(2)}} = ${cosAngle.toFixed(4)}`,
     `\\theta = \\arccos(${cosAngle.toFixed(4)})`,
   ];
@@ -1559,17 +1684,17 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
           `\\alpha = \\arccos\\left(\\frac{${
             parsedPointP.x
           }}{${calculatedMagnitude.toFixed(
-            2
+            2,
           )}}\\right) \\approx ${alphaDeg.toFixed(2)}°`,
           `\\beta = \\arccos\\left(\\frac{${
             parsedPointP.y
           }}{${calculatedMagnitude.toFixed(
-            2
+            2,
           )}}\\right) \\approx ${betaDeg.toFixed(2)}°`,
           `\\gamma = \\arccos\\left(\\frac{${
             parsedPointP.z
           }}{${calculatedMagnitude.toFixed(
-            2
+            2,
           )}}\\right)  \\approx ${gammaDeg.toFixed(2)}°`,
         ]
       : [];
@@ -1586,7 +1711,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
 
   if (mag3 === 0) {
     unitVectorSteps1.push(
-      "La magnitud del vector es cero, por lo tanto, no se puede calcular un vector unitario."
+      "La magnitud del vector es cero, por lo tanto, no se puede calcular un vector unitario.",
     );
   } else {
     let finalVx = parsedPointP.x;
@@ -1598,7 +1723,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       finalVy = -parsedPointP.y;
       finalVz = -parsedPointP.z;
       unitVectorSteps1.push(
-        `Vector en dirección opuesta: V' = (${finalVx}, ${finalVy}, ${finalVz})`
+        `Vector en dirección opuesta: V' = (${finalVx}, ${finalVy}, ${finalVz})`,
       );
     }
 
@@ -1611,17 +1736,17 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     unitVectorSteps1.push(
       `|V| = \\sqrt{(${parsedPointP.x})^2 + (${parsedPointP.y})^2 + (${
         parsedPointP.z
-      })^2} = \\sqrt{${sumSq}} \\approx ${mag3.toFixed(2)}`
+      })^2} = \\sqrt{${sumSq}} \\approx ${mag3.toFixed(2)}`,
     );
     unitVectorSteps1.push(
-      `U_V = \\frac{V}{|V|} = \\left( \\frac{${finalVx}}{\\sqrt{${sumSq}}}, \\frac{${finalVy}}{\\sqrt{${sumSq}}}, \\frac{${finalVz}}{\\sqrt{${sumSq}}} \\right)`
+      `U_V = \\frac{V}{|V|} = \\left( \\frac{${finalVx}}{\\sqrt{${sumSq}}}, \\frac{${finalVy}}{\\sqrt{${sumSq}}}, \\frac{${finalVz}}{\\sqrt{${sumSq}}} \\right)`,
     );
     unitVectorSteps1.push(
       `U_V \\approx \\left( ${calculatedUnitVector.x.toFixed(
-        3
+        3,
       )}, ${calculatedUnitVector.y.toFixed(
-        3
-      )}, ${calculatedUnitVector.z.toFixed(3)} \\right)`
+        3,
+      )}, ${calculatedUnitVector.z.toFixed(3)} \\right)`,
     );
   }
 
@@ -1644,14 +1769,14 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
 
   // Magnitud del producto cruz
   const crossMagnitude = Math.sqrt(
-    crossProduct.x ** 2 + crossProduct.y ** 2 + crossProduct.z ** 2
+    crossProduct.x ** 2 + crossProduct.y ** 2 + crossProduct.z ** 2,
   );
   // Magnitudes de los vectores originales
   const magU = Math.sqrt(
-    parsedPointP.x ** 2 + parsedPointP.y ** 2 + parsedPointP.z ** 2
+    parsedPointP.x ** 2 + parsedPointP.y ** 2 + parsedPointP.z ** 2,
   );
   const magV = Math.sqrt(
-    parsedDistP2.x ** 2 + parsedDistP2.y ** 2 + parsedDistP2.z ** 2
+    parsedDistP2.x ** 2 + parsedDistP2.y ** 2 + parsedDistP2.z ** 2,
   );
   // Ángulo entre los vectores
   const sinAngle = Math.sin(angleRad);
@@ -1695,13 +1820,13 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       parsedDistP2.z
     }^2} \\approx ${magV.toFixed(2)}`,
     `\\theta = ${angleDeg.toFixed(
-      2
+      2,
     )}° \\quad \\sin(\\theta) \\approx ${sinAngle.toFixed(4)}`,
     `|\\vec{u} \\times \\vec{v}| = |\\vec{u}| \\cdot |\\vec{v}| \\cdot \\sin(\\theta)`,
     `|\\vec{u} \\times \\vec{v}| = ${magU.toFixed(2)} \\times ${magV.toFixed(
-      2
+      2,
     )} \\times ${sinAngle.toFixed(4)} \\approx ${theoreticalMagnitude.toFixed(
-      2
+      2,
     )}`,
   ];
 
@@ -1729,14 +1854,9 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     z: parsedR.z - parsedDistP2.z,
   };
 
-  const crossI2 =
-    vectorPQ.y * vectorQR.z - vectorPQ.z * vectorQR.y;
-  const crossJ2 = -(
-    vectorPQ.x * vectorQR.z -
-    vectorPQ.z * vectorQR.x
-  );
-  const crossK2 =
-    vectorPQ.x * vectorQR.y - vectorPQ.y * vectorQR.x;
+  const crossI2 = vectorPQ.y * vectorQR.z - vectorPQ.z * vectorQR.y;
+  const crossJ2 = -(vectorPQ.x * vectorQR.z - vectorPQ.z * vectorQR.x);
+  const crossK2 = vectorPQ.x * vectorQR.y - vectorPQ.y * vectorQR.x;
 
   const crossProduct2: Vector = {
     x: crossI2,
@@ -1746,7 +1866,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
 
   // Área del paralelogramo = magnitud del producto cruz
   const area = Math.sqrt(
-    crossProduct.x ** 2 + crossProduct.y ** 2 + crossProduct.z ** 2
+    crossProduct.x ** 2 + crossProduct.y ** 2 + crossProduct.z ** 2,
   );
 
   // Área del triángulo = mitad del área del paralelogramo
