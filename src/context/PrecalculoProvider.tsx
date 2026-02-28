@@ -174,7 +174,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
       `y - ${y1} = m(x - (${x1}))`,
       `y - ${y1} = ${pendiente.toFixed(2)}(x - (${x1}))`,
       `y - ${y1} = ${pendiente.toFixed(2)}x + (${(-pendiente * x1).toFixed(
-        2
+        2,
       )})`,
       `y = ${pendiente.toFixed(2)}x + ${(y1 - pendiente * x1).toFixed(2)}`,
     ];
@@ -212,25 +212,25 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
   // Paso 2: factor común de "a"
   const paso2 = `f(x) = ${a}\\left(x^2 ${formatTerm(
     b / a,
-    "x"
+    "x",
   )}\\right) ${formatTerm(c)}`;
 
   // Paso 3: completar cuadrado
   const paso3 = `f(x) = ${a}\\left(x^2 ${formatTerm(
     b / a,
-    "x"
+    "x",
   )} + \\left(\\frac{${b}}{2${a}}\\right)^2 - \\left(\\frac{${b}}{2${a}}\\right)^2\\right) ${formatTerm(
-    c
+    c,
   )}`;
 
   // Paso 4: agrupando en binomio cuadrado
   const paso4 = `f(x) = ${a}\\left((x + \\frac{${b}}{2${a}})^2 - \\left(\\frac{${b}}{2${a}}\\right)^2\\right) ${formatTerm(
-    c
+    c,
   )}`;
 
   // Paso 5: forma normal (con vértice)
   const paso5 = `f(x) = ${a}(x - (${formatNumber(h)}))^2 ${formatTerm(
-    Number(formatNumber(k))
+    Number(formatNumber(k)),
   )}`;
 
   // Máximo o mínimo
@@ -460,7 +460,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
 
   const [polynomialExpr, setPolynomialExpr] = useState("x^3-2x^2-3x");
   const [polynomial, setPolynomial] = useState(
-    () => new Polynomial([1, -2, -3, 0])
+    () => new Polynomial([1, -2, -3, 0]),
   );
 
   const handlePolynomialChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -495,12 +495,12 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
           { x: 1, y: 0, note: "raíz" },
         ]
       : polynomial === new Polynomial([1, -2, -3, 0])
-      ? [
-          { x: 0, y: 0, note: "raíz" },
-          { x: 3, y: 0, note: "raíz" },
-          { x: -1, y: 0, note: "raíz" },
-        ]
-      : [];
+        ? [
+            { x: 0, y: 0, note: "raíz" },
+            { x: 3, y: 0, note: "raíz" },
+            { x: -1, y: 0, note: "raíz" },
+          ]
+        : [];
 
   // Puntos críticos simplificados
   let criticalPoints: {
@@ -608,7 +608,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
 
   function candidatesByRRT(
     constant: number,
-    leading: number
+    leading: number,
   ): { p: number[]; q: number[]; list: number[] } {
     const p = factors(constant);
     const q = factors(leading);
@@ -686,7 +686,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
   function factorQuadraticInt(
     a: number,
     b: number,
-    c: number
+    c: number,
   ): null | [number, number] {
     if (a === 0) return null;
     // Sólo manejamos monicos o a con factores enteros simples
@@ -722,8 +722,8 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
           m[1] === "+" || m[1] === ""
             ? 1
             : m[1] === "-"
-            ? -1
-            : parseInt(m[1], 10);
+              ? -1
+              : parseInt(m[1], 10);
         const exp = m[2] ? parseInt(m[2], 10) : 1;
         terms.push({ c: coef, e: exp });
       } else if (m[1] === "" && m[2]) {
@@ -809,7 +809,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
     if (coeffs.length === 4) {
       const { list: list2 } = candidatesByRRT(
         coeffs[coeffs.length - 1],
-        coeffs[0]
+        coeffs[0],
       );
       const ordered2 = [
         ...list2.filter((x) => x > 0),
@@ -836,7 +836,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
 
     // ¿Todos positivos para la NOTA de cota superior?
     const upperBoundNoteIndex = synSteps.findIndex(
-      (s) => s.remainder === 0 && s.bottom.every((v) => v > 0)
+      (s) => s.remainder === 0 && s.bottom.every((v) => v > 0),
     );
 
     // Construimos las cadenas LaTeX de P(x) paso a paso
@@ -872,8 +872,8 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
           const Qdiv = quotient.map((c) => c / gQ);
           partials.push(
             `P(x) = ${prefix}${factorLatex}\\,${gQ}\\left(${polyToLatex(
-              Qdiv
-            )}\\right)`
+              Qdiv,
+            )}\\right)`,
           );
           // ¿Se puede combinar como en la imagen?
           if (gQ % qq === 0) {
@@ -884,7 +884,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
                 ? `(${qq}x ${sign} ${pp})`
                 : `${k}\\,(${qq}x ${sign} ${pp})`;
             partials.push(
-              `P(x) = ${prefix}${combined}\\left(${polyToLatex(Qdiv)}\\right)`
+              `P(x) = ${prefix}${combined}\\left(${polyToLatex(Qdiv)}\\right)`,
             );
             // aplicamos combinación a nuestro "prefix" para pasos siguientes
             factPrefix.push(combined);
@@ -1055,7 +1055,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
   function longDivisionDESC(
     dividend: number[],
     divisor: number[],
-    maxIterations = 200
+    maxIterations = 200,
   ) {
     if (divisor.length === 0 || Math.abs(divisor[0]) < EPS) {
       throw new Error("El divisor no puede ser 0.");
@@ -1455,7 +1455,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
     } catch (e) {
       console.error(e);
       alert(
-        "Error al interpretar el polinomio. Usa formato como: 3x^6 + 4x^5 + 3x^3 - x - 3"
+        "Error al interpretar el polinomio. Usa formato como: 3x^6 + 4x^5 + 3x^3 - x - 3",
       );
     }
   }
@@ -1541,7 +1541,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
       `= (${a.re}+${a.im}i)(${b.re}+${b.im}i)`,
       `= ${ac} + ${ad}i + ${bc}i + ${bd}i^{2}`,
       `= ${ac - bd} ${sgn(ad + bc)} ${abs(
-        ad + bc
+        ad + bc,
       )}i\\quad\\text{(porque }i^{2}=-1\\text{)}`,
       `= ${r.re} ${sgn(r.im)} ${abs(r.im)}i`,
     ];
@@ -1573,12 +1573,12 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
         `= \\dfrac{${reNum} ${sgn(imNum)} ${abs(imNum)}i}{${den}}`,
         gAll > 1
           ? `= \\dfrac{${reS} ${sgn(imS)} ${abs(
-              imS
+              imS,
             )}i}{${denS}}\\quad\\text{(simplificando por }${gAll}\\text{)}`
           : "",
         `= ${fracLatex(reNum, den)} ${sgn(imNum)} ${fracLatex(
           abs(imNum),
-          den
+          den,
         )}i`,
       ].filter(Boolean);
     } else {
@@ -1697,7 +1697,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
   // Tangente
   const [tanNum, tanDen] = simplifyFraction(
     sinFrac[0] * cosSimpleDen,
-    sinFrac[1] * cosSimpleNum
+    sinFrac[1] * cosSimpleNum,
   );
   // Cotangente
   const [cotNum, cotDen] = simplifyFraction(tanDen, tanNum);
@@ -1818,7 +1818,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
     type: "cos" | "sin" = "cos",
     xMin = -Math.PI,
     xMax = Math.PI * 3,
-    steps = 300
+    steps = 300,
   ) {
     const data: { x: number; y: number }[] = [];
     for (let i = 0; i <= steps; i++) {
@@ -1920,11 +1920,11 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
   // parse floats but also keep exact fractional KaTeX form using Fraction when possible
   const a4 = useMemo(
     () => Number(parseFloat(amplitudeInput) || 0),
-    [amplitudeInput]
+    [amplitudeInput],
   );
   const omega = useMemo(
     () => Number(parseFloat(omegaInput) || 0),
-    [omegaInput]
+    [omegaInput],
   );
 
   // derived values
@@ -1935,7 +1935,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
     try {
       return new Fraction(omega).toFraction(true);
     } catch (e) {
-      console.log(e)
+      console.log(e);
       return String(omega);
     }
   })();
@@ -1966,8 +1966,6 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
     return points;
   }, [a4, omega, period, mode]);
 
-
-
   /*  ---- Movimiento Armonico Amortiguado ----   */
 
   // Función amortiguada
@@ -1991,7 +1989,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
 
   // Cálculos derivados
   const p = useMemo(() => 1 / f2, [f2]);
-  const w = useMemo(() => 2 * Math.PI *  f2, [f2]);
+  const w = useMemo(() => 2 * Math.PI * f2, [f2]);
 
   // Datos para la gráfica
   const data7 = useMemo(() => {
@@ -2241,8 +2239,6 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
         p,
         w,
         data7,
-      
-
       }}
     >
       {children}
