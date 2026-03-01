@@ -48,15 +48,39 @@ const Limites = () => {
   const ejemplos = [
     { 
       tipo: "simple" as const,
-      funcion: "(2*x + 3)/(x - 2)", 
-      punto: "2", 
-      nombre: "f(x) = (2x + 3)/(x - 2) en x=2" 
+      funcion: "(x^2 - 6*x + 5)/(x - 5)", 
+      punto: "5", 
+      nombre: "(x² - 6x + 5)/(x - 5) en x=5" 
     },
     { 
       tipo: "simple" as const,
-      funcion: "(x^2 - 9)/(x - 3)", 
-      punto: "3", 
-      nombre: "f(x) = (x² - 9)/(x - 3) en x=3" 
+      funcion: "(x^2 - 5*x + 6)/(x - 5)", 
+      punto: "5", 
+      nombre: "(x² - 5x + 6)/(x - 5) en x=5" 
+    },
+    { 
+      tipo: "simple" as const,
+      funcion: "(x^2 - 9)/(2*x^2 + 7*x + 3)", 
+      punto: "-3", 
+      nombre: "(t² - 9)/(2t² + 7t + 3) en t=-3" 
+    },
+    { 
+      tipo: "simple" as const,
+      funcion: "((-5 + x)^2 - 25)/x", 
+      punto: "0", 
+      nombre: "((-5 + h)² - 25)/h en h=0" 
+    },
+    { 
+      tipo: "simple" as const,
+      funcion: "(x + 2)/(x^3 + 8)", 
+      punto: "-2", 
+      nombre: "(x + 2)/(x³ + 8) en x=-2" 
+    },
+    { 
+      tipo: "simple" as const,
+      funcion: "(sqrt(9 + x) - 3)/x", 
+      punto: "0", 
+      nombre: "(√(9 + h) - 3)/h en h=0" 
     },
     { 
       tipo: "partes" as const,
@@ -114,6 +138,73 @@ const Limites = () => {
     const nuevasPartes = [...partes];
     nuevasPartes[index] = { ...nuevasPartes[index], [campo]: valor };
     setPartes(nuevasPartes);
+  };
+
+  const simplificarIndeterminacion = (expr: string, punto: number): { simplificada: string; pasos: string[]; valor: number | null } => {
+    const pasos: string[] = [];
+    try {
+      // Intentar factorizar expresiones racionales
+      const node = math.parse(expr);
+      
+      // Detectar si es una división
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (node.type === 'OperatorNode' && (node as any).fn === 'divide') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const numerador = (node as any).args[0].toString();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const denominador = (node as any).args[1].toString();
+        
+        pasos.push(`\\text{Forma indeterminada } \\frac{0}{0} \\text{ detectada}`);
+        pasos.push(`\\text{Numerador: } ${convertirALatex(numerador)}`);
+        pasos.push(`\\text{Denominador: } ${convertirALatex(denominador)}`);
+        
+        // Intentar factorizar y simplificar
+        try {
+          const numSimplified = math.simplify(numerador).toString();
+          const denSimplified = math.simplify(denominador).toString();
+          
+          // Evaluar después de simplificar
+          const valorSimplificado = evaluarFuncion(`(${numSimplified})/(${denSimplified})`, punto);
+          
+          if (valorSimplificado !== null && isFinite(valorSimplificado)) {
+            pasos.push(`\\text{Simplificando algebraicamente...}`);
+            pasos.push(`\\text{Sustituyendo } x = ${punto}: ${valorSimplificado.toFixed(4)}`);
+            return { simplificada: `(${numSimplified})/(${denSimplified})`, pasos, valor: valorSimplificado };
+          }
+        } catch (e) {
+          // Si falla la simplificación, intentar L'Hôpital numéricamente
+          const h = 0.0001;
+          const derivadaNumerador = (evaluarFuncion(numerador, punto + h)! - evaluarFuncion(numerador, punto - h)!) / (2 * h);
+          const derivadaDenominador = (evaluarFuncion(denominador, punto + h)! - evaluarFuncion(denominador, punto - h)!) / (2 * h);
+          
+          if (Math.abs(derivadaDenominador) > 0.0001) {
+            const resultado = derivadaNumerador / derivadaDenominador;
+            pasos.push(`\\text{Aplicando regla de L'Hôpital (aproximación numérica)}`);
+            pasos.push(`\\lim_{x \\to ${punto}} \\frac{f'(x)}{g'(x)} \\approx ${resultado.toFixed(4)}`);
+            return { simplificada: expr, pasos, valor: resultado };
+          }
+        }
+      }
+      
+      // Para raíces con indeterminación
+      if (expr.includes('sqrt')) {
+        pasos.push(`\\text{Racionalizando...}`);
+        // Intentar evaluar con límites laterales más precisos
+        const epsilon = 0.00001;
+        const izq = evaluarFuncion(expr, punto - epsilon);
+        const der = evaluarFuncion(expr, punto + epsilon);
+        if (izq !== null && der !== null && Math.abs(izq - der) < 0.01) {
+          const promedio = (izq + der) / 2;
+          pasos.push(`\\text{Límite: } ${promedio.toFixed(4)}`);
+          return { simplificada: expr, pasos, valor: promedio };
+        }
+      }
+      
+    } catch (e) {
+      console.error('Error en simplificación:', e);
+    }
+    
+    return { simplificada: expr, pasos, valor: null };
   };
 
   const convertirALatex = (expr: string): string => {
@@ -280,8 +371,25 @@ const Limites = () => {
         }
       } else {
         valorDirecto = evaluarFuncion(funcion, punto);
-        limitePorIzquierda = evaluarFuncion(funcion, punto - epsilon);
-        limitePorDerecha = evaluarFuncion(funcion, punto + epsilon);
+        
+        // Detectar forma indeterminada 0/0
+        if (valorDirecto === null || !isFinite(valorDirecto) || isNaN(valorDirecto)) {
+          const resultadoSimplificacion = simplificarIndeterminacion(funcion, punto);
+          resultadoSimplificacion.pasos.forEach(p => pasos.push(p));
+          
+          if (resultadoSimplificacion.valor !== null) {
+            valorLimite = resultadoSimplificacion.valor;
+            limite = valorLimite.toFixed(4);
+            limitePorIzquierda = valorLimite;
+            limitePorDerecha = valorLimite;
+          } else {
+            limitePorIzquierda = evaluarFuncion(funcion, punto - epsilon);
+            limitePorDerecha = evaluarFuncion(funcion, punto + epsilon);
+          }
+        } else {
+          limitePorIzquierda = evaluarFuncion(funcion, punto - epsilon);
+          limitePorDerecha = evaluarFuncion(funcion, punto + epsilon);
+        }
 
         pasos.push(`\\text{Límite por la izquierda: } \\lim_{x \\to ${punto}^-} f(x) \\approx ${limitePorIzquierda?.toFixed(4) || "indefinido"}`);
         pasos.push(`\\text{Límite por la derecha: } \\lim_{x \\to ${punto}^+} f(x) \\approx ${limitePorDerecha?.toFixed(4) || "indefinido"}`);

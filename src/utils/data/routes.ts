@@ -245,14 +245,19 @@ export const SemesterRoutes: SemesterType[] = [
             name: "Conversiones",
             href: "/tercersemestre/fisica1/conversiones",
           },
+          // {
+          //   id: 2,
+          //   name: "Fuerza Resultante en Newtons",
+          //   href: "/tercersemestre/fisica1/fuerzaresultantenewtons",
+          // },
           {
-            id: 1,
+            id: 3,
             name: "Videos Fisica 1",
             href: "/tercersemestre/fisica1/videos-fisica1",
             videos: [],
           },
           {
-            id: 2,
+            id: 4,
             name: "Archivos de Drive",
             href: `/tercersemestre/fisica1/archivos-drive`,
             file: "https://docs.google.com/document/d/1UCuLfq72FKuBNcmB7bTL3ss9CkE0ImASOkQSNtY_pys/edit?usp=sharing",

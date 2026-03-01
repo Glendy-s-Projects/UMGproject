@@ -65,7 +65,7 @@ export const BiquadraticSolver = ({
         <p key="fg" className="font-semibold">
           3 Fórmula general en <InlineMath math={`w`} />{" "}
         </p>
-        <BlockMath key="fg1" math={`w=\\frac{-b\\pm\\sqrt{D}}{2a}`} />
+        <BlockMath key="fg1" math={`w=\\frac{-b\\pm\\sqrt{D}} {2a}`} />
         <BlockMath
           key="fg2"
           math={`w=\\frac{-(${b})\\pm\\sqrt{${D}}}{2(${a})}`}

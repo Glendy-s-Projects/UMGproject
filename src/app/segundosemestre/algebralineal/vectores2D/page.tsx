@@ -168,14 +168,16 @@ export default function VectorSolver() {
         </div>
       </div>
 
-      <div className="flex flex-wrap  justify-center gap-4">
-        <div className="mt-2 space-y-2">
+      <div className="flex flex-col items-center  justify-center gap-4">
+        <div className="mt-2 flex flex-col gap-2">
           <h2 className="font-semibold">Pasos </h2>
+
           {output.length === 0 ? (
             <div className="text-muted">No hay cálculos todavía.</div>
           ) : (
             output.map((element, i) => (
               <div key={i} className="bg-black/20 p-2 rounded">
+                
                 {element}
               </div>
             ))
