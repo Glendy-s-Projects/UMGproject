@@ -287,6 +287,7 @@ export type routetype = {
   id: number;
   name: string;
   href: string;
+  mainroute?: string;
   bgColor: string;
   image: string;
   subroutes?: slugstype[];
