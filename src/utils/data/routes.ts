@@ -252,12 +252,17 @@ export const SemesterRoutes: SemesterType[] = [
           // },
           {
             id: 3,
+            name: "Movimiento Rectilíneo Uniforme",
+            href: "/tercersemestre/fisica1/mru",
+          },
+          {
+            id: 4,
             name: "Videos Fisica 1",
             href: "/tercersemestre/fisica1/videos-fisica1",
             videos: [],
           },
           {
-            id: 4,
+            id: 5,
             name: "Archivos de Drive",
             href: `/tercersemestre/fisica1/archivos-drive`,
             file: "https://docs.google.com/document/d/1UCuLfq72FKuBNcmB7bTL3ss9CkE0ImASOkQSNtY_pys/edit?usp=sharing",
