@@ -3,9 +3,10 @@ import React from "react";
 
 type TitleCourseProps = {
   course: string;
+
 };
 
-const TitleCourse = ({ course }: TitleCourseProps) => {
+const TitleCourse = ({ course,  }: TitleCourseProps) => {
   return (
     <div className="flex flex-row w-full h-full ">
       <BotonBack />
