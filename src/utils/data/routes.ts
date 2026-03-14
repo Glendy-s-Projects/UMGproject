@@ -340,7 +340,7 @@ export const SemesterRoutes: SemesterType[] = [
       {
         id: 5,
         name: "Derecho Informativo",
-        href: "/tercersemestre/derechoinformativo",
+        href: "/tercersemestre/derechoinformatico",
         bgColor: "bg-blue-300",
         image: "/derechoinformatico.webp",
         subroutes: [
