@@ -4,6 +4,7 @@ import { MatematicaDiscretaProvider } from "@/context/MatematicaDiscretaProvider
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { PrecalculoProvider } from "@/context/PrecalculoProvider";
 import "./globals.css";
+import Providers from "./Providers";
 
 export const metadata: Metadata = {
   title: "UMG Programms",
@@ -18,16 +19,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <AlgebraProvider>
-          <MatematicaDiscretaProvider>
-            <PrecalculoProvider>
-              {children}
+        <Providers>
+          <AlgebraProvider>
+            <MatematicaDiscretaProvider>
+              <PrecalculoProvider>
+                {children}
 
-              <GoogleAnalytics gaId="G-4DQL7T0JLJ" />
-              <GoogleTagManager gtmId="GTM-TG63XJCB" />
-            </PrecalculoProvider>
-          </MatematicaDiscretaProvider>
-        </AlgebraProvider>
+                <GoogleAnalytics gaId="G-4DQL7T0JLJ" />
+                <GoogleTagManager gtmId="GTM-TG63XJCB" />
+              </PrecalculoProvider>
+            </MatematicaDiscretaProvider>
+          </AlgebraProvider></Providers>
       </body>
     </html>
   );

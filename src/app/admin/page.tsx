@@ -11,128 +11,59 @@ import {
 } from "../../../lib/appwrite";
 import { Models } from "appwrite";
 import { Topic, Course } from "../../../type";
+import { useAdmin } from "../../../lib/useAdmin";
 
 const LoginPage = () => {
-  const [loggedInUser, setLoggedInUser] =
-    useState<Models.User<Models.Preferences> | null>(null);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [topics, setTopics] = useState<Topic[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const { email,
+    setEmail,
+    password,
+    setPassword,
+    name,
+    setName,
+    courseName,
+    setCourseName,
+    selectedTopic,
+    setSelectedTopic,
+    videoName,
+    setVideoName,
+    youtubeCode,
+    setYoutubeCode,
+    selectedCourseVideo,
+    setSelectedCourseVideo,
+    fileName,
+    setFileName,
+    fileRoute,
+    setFileRoute,
+    user,
+    isUserLoading,
+    topics,
+    courses,
+    loginMutation,
+    logoutMutation,
+    createCourseMutation,
+    createVideoMutation,
+    createFileMutation,
+    handleCreateCourse,
+    handleCreateVideo,
+    handleCreateFile, } = useAdmin()
 
-  // Estados para cursos
-  const [courseName, setCourseName] = useState("");
-  const [selectedTopic, setSelectedTopic] = useState("");
+  if (isUserLoading) {
+    return <>Cargando sesion</>
+  }
 
-  // Estados para videos
-  const [videoName, setVideoName] = useState("");
-  const [youtubeCode, setYoutubeCode] = useState("");
-  const [selectedCourseVideo, setSelectedCourseVideo] = useState("");
-
-  // Estados para archivos
-  const [fileName, setFileName] = useState("");
-  const [fileRoute, setFileRoute] = useState("");
-  const [selectedCourseFile, setSelectedCourseFile] = useState("");
-
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const user = await account.get();
-        setLoggedInUser(user);
-      } catch (error) {
-        setLoggedInUser(null);
-      }
-    };
-    checkSession();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const topicsData = await getTopics();
-      const coursesData = await getCourses();
-      setTopics((topicsData || []) as unknown as Topic[]);
-      setCourses((coursesData || []) as unknown as Course[]);
-    };
-    if (loggedInUser) fetchData();
-  }, [loggedInUser]);
-
-  const login = async (email: string, password: string) => {
-    try {
-      const session = await account.createEmailPasswordSession({
-        email,
-        password,
-      });
-      setLoggedInUser(await account.get());
-    } catch (error) {
-      alert("Error al iniciar sesión");
-    }
-  };
-
-  // const register = async () => {
-  //   await account.create({
-  //     userId: ID.unique(),
-  //     email,
-  //     password,
-  //     name,
-  //   });
-  //   login(email, password);
-  // };
-
-  const logout = async () => {
-    await account.deleteSession({ sessionId: "current" });
-    setLoggedInUser(null);
-  };
-
-  const handleCreateCourse = async (e: FormEvent) => {
-    e.preventDefault();
-    try {
-      await createCourse(courseName, selectedTopic);
-      alert("Curso agregado exitosamente");
-      setCourseName("");
-      const coursesData = await getCourses();
-      setCourses((coursesData || []) as unknown as Course[]);
-    } catch (error) {
-      alert("Error al agregar curso");
-    }
-  };
-
-  const handleCreateVideo = async (e: FormEvent) => {
-    e.preventDefault();
-    try {
-      await createVideo(videoName, youtubeCode, selectedCourseVideo);
-      alert("Video agregado exitosamente");
-      setVideoName("");
-      setYoutubeCode("");
-    } catch (error) {
-      alert("Error al agregar video");
-    }
-  };
-
-  const handleCreateFile = async (e: FormEvent) => {
-    e.preventDefault();
-    try {
-      await createFile(fileName, fileRoute, selectedCourseFile);
-      alert("Archivo agregado exitosamente");
-      setFileName("");
-      setFileRoute("");
-    } catch (error) {
-      alert("Error al agregar archivo");
-    }
-  };
-
-  if (loggedInUser) {
+  if (user) {
     return (
       <div className="p-8 max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold">Panel de Administración</h1>
           <div>
-            <span className="mr-4">Bienvenido, {loggedInUser.name}</span>
+            <span className="mr-4">Bienvenido, {user.name}</span>
             <button
-              onClick={logout}
+              onClick={() => logoutMutation.mutate()}
               className="bg-red-500 text-white px-4 py-2 rounded"
+              disabled={logoutMutation.isPending}
             >
-              Cerrar Sesión
+              {logoutMutation.isPending ? "Cerrando" : "Cerrar Sesion"}
             </button>
           </div>
         </div>
@@ -166,8 +97,11 @@ const LoginPage = () => {
               <button
                 type="submit"
                 className="w-full bg-purple-500 text-white p-2 rounded"
+                disabled={
+                  createCourseMutation.isPending
+                }
               >
-                Agregar Curso
+                {createCourseMutation.isPending ? "Agregando..." : "Agregar Curso"}
               </button>
             </form>
           </div>
@@ -208,8 +142,9 @@ const LoginPage = () => {
               <button
                 type="submit"
                 className="w-full bg-blue-500 text-white p-2 rounded"
+                disabled={createVideoMutation.isPending}
               >
-                Agregar Video
+                {createVideoMutation ? "Agregando..." : "Agregar Video"}
               </button>
             </form>
           </div>
@@ -219,8 +154,8 @@ const LoginPage = () => {
             <h2 className="text-xl font-bold mb-4">Agregar Archivo</h2>
             <form onSubmit={handleCreateFile} className="space-y-4">
               <select
-                value={selectedCourseFile}
-                onChange={(e) => setSelectedCourseFile(e.target.value)}
+                value={fileName}
+                onChange={(e) => setFileName(e.target.value)}
                 className="w-full p-2 border rounded"
                 required
               >
@@ -250,8 +185,9 @@ const LoginPage = () => {
               <button
                 type="submit"
                 className="w-full bg-green-500 text-white p-2 rounded"
+                disabled={createFileMutation.isPending}
               >
-                Agregar Archivo
+                {createFileMutation.isPending ? "Agregando..." : "Agregar Archivo"}
               </button>
             </form>
           </div>
@@ -288,10 +224,10 @@ const LoginPage = () => {
           />
           <button
             type="button"
-            onClick={() => login(email, password)}
+            onClick={() => loginMutation.mutate()}
             className="w-full bg-blue-500 text-white p-2 rounded"
           >
-            Iniciar Sesión
+            {loginMutation.isPending ? "Iniciando..." : "Iniciar Sesion"}
           </button>
           {/* <button
             type="button"
