@@ -20,12 +20,72 @@ client
 
 export const databases = new Databases(client);
 
+//-- Funciones para interactuar con la base de datos -//
+//-- CREATE --//
+export const createVideo = async (
+  name: string,
+  youtubeCode: string,
+  courseId: string
+) => {
+  try {
+    const video = await databases.createDocument(
+      appwriteConfig.databaseId!,
+      appwriteConfig.videosCollectionId!,
+      "unique()",
+      { name, youtubeCode, courseId }
+    );
+    return video;
+  } catch (error) {
+    console.error("Error creating video:", error);
+    throw error;
+  }
+};
+
+export const createFile = async (
+  name: string,
+  fileRoute: string,
+  courseId: string
+) => {
+  try {
+    const file = await databases.createDocument(
+      appwriteConfig.databaseId!,
+      appwriteConfig.filesCollectionId!,
+      "unique()",
+      { name, fileRoute, courseId }
+    );
+    return file;
+  } catch (error) {
+    console.error("Error creating file:", error);
+    throw error;
+  }
+};
+
+export const createCourse = async (
+  course: string,
+  topicId: string,
+  bgColor?: string
+) => {
+  try {
+    const newCourse = await databases.createDocument(
+      appwriteConfig.databaseId!,
+      appwriteConfig.courseCollectionId!,
+      "unique()",
+      { course, bgColor: bgColor || null, topicId }
+    );
+    return newCourse;
+  } catch (error) {
+    console.error("Error creating course:", error);
+    throw error;
+  }
+};
+
+//-- READ --//
 export const getTopics = async () => {
   try {
     const topics = await databases.listDocuments(
       appwriteConfig.databaseId!,
       appwriteConfig.topicCollectionId!,
-      [],
+      []
     );
 
     if (topics.documents.length > 0) {
@@ -34,10 +94,10 @@ export const getTopics = async () => {
           const courses = await databases.listDocuments(
             appwriteConfig.databaseId!,
             appwriteConfig.courseCollectionId!,
-            [Query.equal("topicId", topic.$id)],
+            [Query.equal("topicId", topic.$id)]
           );
           return { ...topic, course: courses.documents };
-        }),
+        })
       );
       return topicsWithCourses;
     }
@@ -53,7 +113,7 @@ export const getCourses = async () => {
     const courses = await databases.listDocuments(
       appwriteConfig.databaseId!,
       appwriteConfig.courseCollectionId!,
-      [],
+      []
     );
 
     if (courses.documents.length > 0) {
@@ -71,7 +131,7 @@ export const getFiles = async () => {
     const files = await databases.listDocuments(
       appwriteConfig.databaseId!,
       appwriteConfig.filesCollectionId!,
-      [],
+      []
     );
 
     if (files.documents.length > 0) {
@@ -89,7 +149,7 @@ export const getVideos = async () => {
     const videos = await databases.listDocuments(
       appwriteConfig.databaseId!,
       appwriteConfig.videosCollectionId!,
-      [],
+      []
     );
 
     if (videos.documents.length > 0) {
@@ -102,70 +162,13 @@ export const getVideos = async () => {
   }
 };
 
-export const createVideo = async (
-  name: string,
-  youtubeCode: string,
-  courseId: string,
-) => {
-  try {
-    const video = await databases.createDocument(
-      appwriteConfig.databaseId!,
-      appwriteConfig.videosCollectionId!,
-      "unique()",
-      { name, youtubeCode, courseId },
-    );
-    return video;
-  } catch (error) {
-    console.error("Error creating video:", error);
-    throw error;
-  }
-};
-
-export const createFile = async (
-  name: string,
-  fileRoute: string,
-  courseId: string,
-) => {
-  try {
-    const file = await databases.createDocument(
-      appwriteConfig.databaseId!,
-      appwriteConfig.filesCollectionId!,
-      "unique()",
-      { name, fileRoute, courseId },
-    );
-    return file;
-  } catch (error) {
-    console.error("Error creating file:", error);
-    throw error;
-  }
-};
-
-export const createCourse = async (
-  course: string,
-  topicId: string,
-  bgColor?: string,
-) => {
-  try {
-    const newCourse = await databases.createDocument(
-      appwriteConfig.databaseId!,
-      appwriteConfig.courseCollectionId!,
-      "unique()",
-      { course, bgColor: bgColor || null, topicId },
-    );
-    return newCourse;
-  } catch (error) {
-    console.error("Error creating course:", error);
-    throw error;
-  }
-};
-
 export const getCourseByName = async (courseName: string) => {
   try {
     // 1. Buscar el curso por nombre
     const courses = await databases.listDocuments(
       appwriteConfig.databaseId!,
       appwriteConfig.courseCollectionId!,
-      [Query.equal("course", courseName)],
+      [Query.equal("course", courseName)]
     );
 
     if (courses.documents.length === 0) {
@@ -178,14 +181,14 @@ export const getCourseByName = async (courseName: string) => {
     const videos = await databases.listDocuments(
       appwriteConfig.databaseId!,
       appwriteConfig.videosCollectionId!,
-      [Query.equal("courseId", course.$id)],
+      [Query.equal("courseId", course.$id)]
     );
 
     // 3. Obtener archivos del curso
     const files = await databases.listDocuments(
       appwriteConfig.databaseId!,
       appwriteConfig.filesCollectionId!,
-      [Query.equal("courseId", course.$id)],
+      [Query.equal("courseId", course.$id)]
     );
 
     return {
@@ -195,6 +198,22 @@ export const getCourseByName = async (courseName: string) => {
     };
   } catch (error) {
     console.error("Error fetching course by name:", error);
+    throw error;
+  }
+};
+
+//-- UPDATE --//
+export const updateTopic = async (topicId: string, newSemesterName: string) => {
+  try {
+    const updatedTopic = await databases.updateDocument(
+      appwriteConfig.databaseId!,
+      appwriteConfig.topicCollectionId!,
+      topicId,
+      { semester: newSemesterName }
+    );
+    return updatedTopic;
+  } catch (error) {
+    console.error("Error updating topic:", error);
     throw error;
   }
 };

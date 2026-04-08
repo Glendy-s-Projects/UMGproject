@@ -7,6 +7,9 @@ import {
   createVideo,
   getCourses,
   getTopics,
+  getFiles,
+  getVideos,
+  updateTopic,
 } from "./appwrite";
 import { Course, Topic } from "../type";
 
@@ -24,11 +27,19 @@ export const useAdmin = () => {
 
   const [videoName, setVideoName] = useState("");
   const [youtubeCode, setYoutubeCode] = useState("");
-  const [selectedCourseVideo, setSelectedCourseVideo] = useState("");
 
   const [fileName, setFileName] = useState("");
   const [fileRoute, setFileRoute] = useState("");
-  const [selectedCourseFile, setselectedCourseFile] = useState("");
+
+  const [activeVideoCourseId, setActiveVideoCourseId] = useState<string | null>(
+    ""
+  );
+  const [activeFileCourseId, setActiveFileCourseId] = useState<string | null>(
+    ""
+  );
+
+  const [editingTopicId, setEditingTopicId] = useState<string | null>(null);
+  const [editTopicName, setEditTopicName] = useState("");
 
   //-- Queries (Estado del servidor)---//
 
@@ -53,6 +64,19 @@ export const useAdmin = () => {
   const { data: courses = [] } = useQuery({
     queryKey: ["courses"],
     queryFn: async () => ((await getCourses()) || []) as unknown as Course[],
+    enabled: !!user,
+  });
+
+  const { data: files = [] } = useQuery({
+    queryKey: ["files"],
+    queryFn: async () => (await getFiles()) || [],
+    enabled: !!user,
+  });
+
+  const { data: videos = [] } = useQuery({
+    queryKey: ["videos"],
+    queryFn: async () => (await getVideos()) || [],
+    enabled: !!user,
   });
 
   //----MUTATIONS (Acciones)----//
@@ -62,7 +86,10 @@ export const useAdmin = () => {
       return await account.get();
     },
     onSuccess: (userData) => queryClient.setQueryData(["user"], userData),
-    onError: () => queryClient.setQueryData(["user"], null),
+    onError: () => {
+      queryClient.setQueryData(["user"], null);
+      alert("Error al iniciar sesión. Verifica tus credenciales.");
+    },
   });
 
   const logoutMutation = useMutation({
@@ -82,23 +109,47 @@ export const useAdmin = () => {
   });
 
   const createVideoMutation = useMutation({
-    mutationFn: () => createVideo(videoName, youtubeCode, selectedCourseVideo),
+    mutationFn: (courseId: string) =>
+      createVideo(videoName, youtubeCode, courseId),
     onSuccess: () => {
       alert("Video agregado exitosamente");
       setVideoName("");
       setYoutubeCode("");
+      setActiveVideoCourseId(null);
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
     },
     onError: () => alert("Error al agregar video"),
   });
 
   const createFileMutation = useMutation({
-    mutationFn: () => createFile(fileName, fileRoute, selectedCourseVideo),
+    mutationFn: (courseId: string) => createFile(fileName, fileRoute, courseId),
     onSuccess: () => {
       alert("Archivo agregado exitosamente");
       setFileName("");
       setFileRoute("");
+      setActiveFileCourseId(null);
+      queryClient.invalidateQueries({ queryKey: ["files"] });
     },
     onError: () => alert("Error al agregar archivo"),
+  });
+
+  //---CRUD de Topics---//
+
+  const updateTopicMutation = useMutation({
+    mutationFn: ({
+      topicId,
+      newSemesterName,
+    }: {
+      topicId: string;
+      newSemesterName: string;
+    }) => updateTopic(topicId, newSemesterName),
+    onSuccess: () => {
+      alert("Tema actualizado exitosamente");
+      queryClient.invalidateQueries({ queryKey: ["topics"] });
+      setEditingTopicId(null);
+      setEditTopicName("");
+    },
+    onError: () => alert("Error al actualizar el tema"),
   });
 
   //-- Manejadores de eventos --//
@@ -106,13 +157,15 @@ export const useAdmin = () => {
     e.preventDefault();
     createCourseMutation.mutate();
   };
-  const handleCreateVideo = (e: FormEvent) => {
+
+  const handleCreateVideo = (e: FormEvent, courseId: string) => {
     e.preventDefault();
-    createVideoMutation.mutate();
+    createVideoMutation.mutate(courseId);
   };
-  const handleCreateFile = (e: FormEvent) => {
+
+  const handleCreateFile = (e: FormEvent, courseId: string) => {
     e.preventDefault();
-    createFileMutation.mutate();
+    createFileMutation.mutate(courseId);
   };
 
   //Retornamos todo lo que la UI va a necesitar
@@ -131,8 +184,6 @@ export const useAdmin = () => {
     setVideoName,
     youtubeCode,
     setYoutubeCode,
-    selectedCourseVideo,
-    setSelectedCourseVideo,
     fileName,
     setFileName,
     fileRoute,
@@ -141,6 +192,8 @@ export const useAdmin = () => {
     isUserLoading,
     topics,
     courses,
+    files,
+    videos,
     loginMutation,
     logoutMutation,
     createCourseMutation,
@@ -149,5 +202,14 @@ export const useAdmin = () => {
     handleCreateCourse,
     handleCreateVideo,
     handleCreateFile,
+    activeVideoCourseId,
+    setActiveVideoCourseId,
+    activeFileCourseId,
+    setActiveFileCourseId,
+    editTopicName,
+    setEditTopicName,
+    editingTopicId,
+    setEditingTopicId,
+    updateTopicMutation,
   };
 };
