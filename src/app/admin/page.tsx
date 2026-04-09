@@ -9,10 +9,6 @@ const LoginPage = () => {
     setPassword,
     name,
     setName,
-    courseName,
-    setCourseName,
-    selectedTopic,
-    setSelectedTopic,
     videoName,
     setVideoName,
     youtubeCode,
@@ -28,10 +24,8 @@ const LoginPage = () => {
     videos,
     loginMutation,
     logoutMutation,
-    createCourseMutation,
     createVideoMutation,
     createFileMutation,
-    handleCreateCourse,
     handleCreateVideo,
     handleCreateFile,
     activeVideoCourseId,
@@ -86,43 +80,6 @@ const LoginPage = () => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {/* Formulario para agregar cursos */}
-          <div className="border p-6 rounded-lg">
-            <h2 className="text-xl font-bold mb-4">Agregar Curso</h2>
-            <form onSubmit={handleCreateCourse} className="space-y-4">
-              <select
-                value={selectedTopic}
-                onChange={(e) => setSelectedTopic(e.target.value)}
-                className="w-full p-2 border rounded"
-                required
-              >
-                <option value="">Seleccionar Semestre</option>
-                {topics.map((topic) => (
-                  <option key={topic.$id} value={topic.$id}>
-                    {topic.semester}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="text"
-                placeholder="Nombre del curso"
-                value={courseName}
-                onChange={(e) => setCourseName(e.target.value)}
-                className="w-full p-2 border rounded"
-                required
-              />
-              <button
-                type="submit"
-                className="w-full bg-purple-500 text-white p-2 rounded"
-                disabled={createCourseMutation.isPending}
-              >
-                {createCourseMutation.isPending
-                  ? "Agregando..."
-                  : "Agregar Curso"}
-              </button>
-            </form>
-          </div>
-
           {/* Lista dinámica de Semestres, Cursos, Videos y Archivos */}
           <div className="md:col-span-3 mt-8">
             <h2 className="text-xl font-bold mb-4 border-b pb-2">
