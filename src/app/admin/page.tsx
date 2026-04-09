@@ -43,8 +43,26 @@ const LoginPage = () => {
     editingTopicId,
     setEditingTopicId,
     updateTopicMutation,
+    editCourseName,
+    setEditCourseName,
+    editingCourseId,
+    setEditingCourseId,
+    updateCourseMutation,
+    editingVideoId,
+    setEditingVideoId,
+    editVideoName,
+    setEditVideoName,
+    editYoutubeCode,
+    setEditYoutubeCode,
+    updateVideoMutation,
+    editingFileId,
+    setEditingFileId,
+    editFileName,
+    setEditFileName,
+    editFileRoute,
+    setEditFileRoute,
+    updateFileMutation,
   } = useAdmin();
-
 
   if (isUserLoading) {
     return <>Cargando sesion</>;
@@ -136,22 +154,26 @@ const LoginPage = () => {
                         >
                           Guardar
                         </button>
-                        <button onClick={() => setEditingTopicId(null)} className="bg-gray-500 text-white px-2 py-1 rounded">
+                        <button
+                          onClick={() => setEditingTopicId(null)}
+                          className="bg-gray-500 text-white px-2 py-1 rounded"
+                        >
                           Cancelar
                         </button>
                       </div>
                     ) : (
                       <div className="">
                         <p>{topic.semester}</p>
-                        <button onClick={() => {
-                          setEditingTopicId(topic.$id);
-                          setEditTopicName(topic.semester);
-                        }}>
+                        <button
+                          onClick={() => {
+                            setEditingTopicId(topic.$id);
+                            setEditTopicName(topic.semester);
+                          }}
+                        >
                           Editar
                         </button>
                       </div>
                     )}
-
                   </h3>
 
                   <div className="mt-4 space-y-4">
@@ -161,11 +183,52 @@ const LoginPage = () => {
                         key={course.$id}
                         className="bg-white p-4 rounded border shadow-sm"
                       >
-                        <h4 className="font-bold text-lg text-blue-600">
-                          {course.course}
-                        </h4>
+                        {editingCourseId === course.$id ? (
+                          <div className="flex items-center space-x-2 mb-4">
+                            <input
+                              type="text"
+                              value={editCourseName}
+                              onChange={(e) =>
+                                setEditCourseName(e.target.value)
+                              }
+                              className="w-full p-1 border rounded"
+                            />
+                            <button
+                              onClick={() =>
+                                updateCourseMutation.mutate({
+                                  courseId: course.$id,
+                                  newCourseName: editCourseName,
+                                })
+                              }
+                              className="bg-green-500 text-white px-2 py-1 rounded text-sm"
+                            >
+                              Guardar
+                            </button>
+                            <button
+                              onClick={() => setEditingCourseId(null)}
+                              className="bg-gray-500 text-white px-2 py-1 rounded text-sm"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex justify-between items-center mb-4">
+                            <h4 className="font-bold text-lg text-blue-600">
+                              {course.course}
+                            </h4>
+                            <button
+                              onClick={() => {
+                                setEditingCourseId(course.$id);
+                                setEditCourseName(course.course);
+                              }}
+                              className="text-sm text-blue-500 hover:underline"
+                            >
+                              Editar Curso
+                            </button>
+                          </div>
+                        )}
 
-                        <div className="grid grid-cols-2 gap-4 mt-4">
+                        <div className="grid grid-cols-2 gap-4">
                           {/* Renderizar Videos del Curso */}
                           <div>
                             <div className="flex justify-between items-center border-b pb-1 mb-2">
@@ -228,7 +291,66 @@ const LoginPage = () => {
                               {videos
                                 .filter((v: any) => v.courseId === course.$id)
                                 .map((video: any) => (
-                                  <li key={video.$id}>{video.name}</li>
+                                  <li key={video.$id} className="mb-2">
+                                    {editingVideoId === video.$id ? (
+                                      <div className="flex flex-col space-y-2 bg-blue-50 p-2 rounded mt-1 border">
+                                        <input
+                                          type="text"
+                                          value={editVideoName}
+                                          onChange={(e) =>
+                                            setEditVideoName(e.target.value)
+                                          }
+                                          className="p-1 border rounded w-full text-xs"
+                                        />
+                                        <input
+                                          type="text"
+                                          value={editYoutubeCode}
+                                          onChange={(e) =>
+                                            setEditYoutubeCode(e.target.value)
+                                          }
+                                          className="p-1 border rounded w-full text-xs"
+                                        />
+                                        <div className="flex space-x-2">
+                                          <button
+                                            onClick={() =>
+                                              updateVideoMutation.mutate({
+                                                videoId: video.$id,
+                                                newVideoName: editVideoName,
+                                                newYoutubeCode: editYoutubeCode,
+                                              })
+                                            }
+                                            className="bg-green-500 text-white px-2 py-1 rounded text-xs"
+                                          >
+                                            Guardar
+                                          </button>
+                                          <button
+                                            onClick={() =>
+                                              setEditingVideoId(null)
+                                            }
+                                            className="bg-gray-500 text-white px-2 py-1 rounded text-xs"
+                                          >
+                                            Cancelar
+                                          </button>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <div className="flex justify-between items-center group">
+                                        <span>{video.name}</span>
+                                        <button
+                                          onClick={() => {
+                                            setEditingVideoId(video.$id);
+                                            setEditVideoName(video.name);
+                                            setEditYoutubeCode(
+                                              video.youtubeCode,
+                                            );
+                                          }}
+                                          className="text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                          Editar
+                                        </button>
+                                      </div>
+                                    )}
+                                  </li>
                                 ))}
                             </ul>
                           </div>
@@ -293,7 +415,65 @@ const LoginPage = () => {
                               {files
                                 .filter((f: any) => f.courseId === course.$id)
                                 .map((file: any) => (
-                                  <li key={file.$id}>{file.name}</li>
+                                  <li key={file.$id} className="mb-2">
+                                    {editingFileId === file.$id ? (
+                                      <div className="flex flex-col space-y-2 bg-blue-50 p-2 rounded mt-1 border">
+                                        <input
+                                          type="text"
+                                          className="p-1 border rounded w-full text-xs"
+                                          value={editFileName}
+                                          onChange={(e) =>
+                                            setEditFileName(e.target.value)
+                                          }
+                                        />
+                                        <input
+                                          type="text"
+                                          className="p-1 border rounded w-full text-xs"
+                                          value={editFileRoute}
+                                          onChange={(e) =>
+                                            setEditFileRoute(e.target.value)
+                                          }
+                                        />
+                                        <div className="flex space-x-2">
+                                          <button
+                                            className="bg-green-500 text-white px-2 py-1 rounded text-xs"
+                                            onClick={() =>
+                                              updateFileMutation.mutate({
+                                                fileId: file.$id,
+                                                newFileName: editFileName,
+                                                newFileRoute: editFileRoute,
+                                              })
+                                            }
+                                          >
+                                            {" "}
+                                            Guardar
+                                          </button>
+                                          <button
+                                            className="bg-gray-500 text-white px-2 py-1 rounded text-xs"
+                                            onClick={() =>
+                                              setEditingFileId(null)
+                                            }
+                                          >
+                                            Cancelar
+                                          </button>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <div className="flex justify-between items-center group">
+                                        <span className="">{file.name} </span>
+                                        <button
+                                          className="text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                          onClick={() => {
+                                            setEditingFileId(file.$id);
+                                            setEditFileName(file.name);
+                                            setEditFileRoute(file.fileRoute);
+                                          }}
+                                        >
+                                          Editar
+                                        </button>
+                                      </div>
+                                    )}
+                                  </li>
                                 ))}
                             </ul>
                           </div>
