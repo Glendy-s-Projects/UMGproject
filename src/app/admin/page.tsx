@@ -1,20 +1,9 @@
 "use client";
-import { useState, useEffect, FormEvent } from "react";
-import {
-  account,
-  ID,
-  getTopics,
-  getCourses,
-  createCourse,
-  createVideo,
-  createFile,
-} from "../../../lib/appwrite";
-import { Models } from "appwrite";
-import { Topic, Course } from "../../../type";
 import { useAdmin } from "../../../lib/useAdmin";
 
 const LoginPage = () => {
-  const { email,
+  const {
+    email,
     setEmail,
     password,
     setPassword,
@@ -28,8 +17,6 @@ const LoginPage = () => {
     setVideoName,
     youtubeCode,
     setYoutubeCode,
-    selectedCourseVideo,
-    setSelectedCourseVideo,
     fileName,
     setFileName,
     fileRoute,
@@ -37,7 +24,8 @@ const LoginPage = () => {
     user,
     isUserLoading,
     topics,
-    courses,
+    files,
+    videos,
     loginMutation,
     logoutMutation,
     createCourseMutation,
@@ -45,10 +33,21 @@ const LoginPage = () => {
     createFileMutation,
     handleCreateCourse,
     handleCreateVideo,
-    handleCreateFile, } = useAdmin()
+    handleCreateFile,
+    activeVideoCourseId,
+    setActiveVideoCourseId,
+    activeFileCourseId,
+    setActiveFileCourseId,
+    editTopicName,
+    setEditTopicName,
+    editingTopicId,
+    setEditingTopicId,
+    updateTopicMutation,
+  } = useAdmin();
+
 
   if (isUserLoading) {
-    return <>Cargando sesion</>
+    return <>Cargando sesion</>;
   }
 
   if (user) {
@@ -97,99 +96,214 @@ const LoginPage = () => {
               <button
                 type="submit"
                 className="w-full bg-purple-500 text-white p-2 rounded"
-                disabled={
-                  createCourseMutation.isPending
-                }
+                disabled={createCourseMutation.isPending}
               >
-                {createCourseMutation.isPending ? "Agregando..." : "Agregar Curso"}
+                {createCourseMutation.isPending
+                  ? "Agregando..."
+                  : "Agregar Curso"}
               </button>
             </form>
           </div>
 
-          {/* Formulario para agregar videos */}
-          <div className="border p-6 rounded-lg">
-            <h2 className="text-xl font-bold mb-4">Agregar Video</h2>
-            <form onSubmit={handleCreateVideo} className="space-y-4">
-              <select
-                value={selectedCourseVideo}
-                onChange={(e) => setSelectedCourseVideo(e.target.value)}
-                className="w-full p-2 border rounded"
-                required
-              >
-                <option value="">Seleccionar Curso</option>
-                {courses.map((course) => (
-                  <option key={course.$id} value={course.$id}>
-                    {course.course}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="text"
-                placeholder="Nombre del video"
-                value={videoName}
-                onChange={(e) => setVideoName(e.target.value)}
-                className="w-full p-2 border rounded"
-                required
-              />
-              <input
-                type="text"
-                placeholder="Código de YouTube"
-                value={youtubeCode}
-                onChange={(e) => setYoutubeCode(e.target.value)}
-                className="w-full p-2 border rounded"
-                required
-              />
-              <button
-                type="submit"
-                className="w-full bg-blue-500 text-white p-2 rounded"
-                disabled={createVideoMutation.isPending}
-              >
-                {createVideoMutation ? "Agregando..." : "Agregar Video"}
-              </button>
-            </form>
-          </div>
+          {/* Lista dinámica de Semestres, Cursos, Videos y Archivos */}
+          <div className="md:col-span-3 mt-8">
+            <h2 className="text-xl font-bold mb-4 border-b pb-2">
+              Contenido Actual
+            </h2>
+            <div className="space-y-6">
+              {topics.map((topic) => (
+                <div
+                  key={topic.$id}
+                  className="border p-6 rounded-lg bg-gray-50"
+                >
+                  <h3 className="text-xl font-bold text-gray-800">
+                    {editingTopicId === topic.$id ? (
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="text"
+                          value={editTopicName}
+                          onChange={(e) => setEditTopicName(e.target.value)}
+                          className="w-full p-1 border rounded"
+                        />
+                        <button
+                          onClick={() =>
+                            updateTopicMutation.mutate({
+                              topicId: topic.$id,
+                              newSemesterName: editTopicName,
+                            })
+                          }
+                          className="bg-green-500 text-white px-2 py-1 rounded"
+                        >
+                          Guardar
+                        </button>
+                        <button onClick={() => setEditingTopicId(null)} className="bg-gray-500 text-white px-2 py-1 rounded">
+                          Cancelar
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="">
+                        <p>{topic.semester}</p>
+                        <button onClick={() => {
+                          setEditingTopicId(topic.$id);
+                          setEditTopicName(topic.semester);
+                        }}>
+                          Editar
+                        </button>
+                      </div>
+                    )}
 
-          {/* Formulario para agregar archivos */}
-          <div className="border p-6 rounded-lg">
-            <h2 className="text-xl font-bold mb-4">Agregar Archivo</h2>
-            <form onSubmit={handleCreateFile} className="space-y-4">
-              <select
-                value={fileName}
-                onChange={(e) => setFileName(e.target.value)}
-                className="w-full p-2 border rounded"
-                required
-              >
-                <option value="">Seleccionar Curso</option>
-                {courses.map((course) => (
-                  <option key={course.$id} value={course.$id}>
-                    {course.course}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="text"
-                placeholder="Nombre del archivo"
-                value={fileName}
-                onChange={(e) => setFileName(e.target.value)}
-                className="w-full p-2 border rounded"
-                required
-              />
-              <input
-                type="text"
-                placeholder="URL del archivo"
-                value={fileRoute}
-                onChange={(e) => setFileRoute(e.target.value)}
-                className="w-full p-2 border rounded"
-                required
-              />
-              <button
-                type="submit"
-                className="w-full bg-green-500 text-white p-2 rounded"
-                disabled={createFileMutation.isPending}
-              >
-                {createFileMutation.isPending ? "Agregando..." : "Agregar Archivo"}
-              </button>
-            </form>
+                  </h3>
+
+                  <div className="mt-4 space-y-4">
+                    {/* @ts-ignore - 'course' viene anidado desde Appwrite */}
+                    {topic.course?.map((course: any) => (
+                      <div
+                        key={course.$id}
+                        className="bg-white p-4 rounded border shadow-sm"
+                      >
+                        <h4 className="font-bold text-lg text-blue-600">
+                          {course.course}
+                        </h4>
+
+                        <div className="grid grid-cols-2 gap-4 mt-4">
+                          {/* Renderizar Videos del Curso */}
+                          <div>
+                            <div className="flex justify-between items-center border-b pb-1 mb-2">
+                              <h5 className="font-semibold text-gray-700">
+                                Videos
+                              </h5>
+                              <button
+                                onClick={() =>
+                                  setActiveVideoCourseId(
+                                    activeVideoCourseId === course.$id
+                                      ? null
+                                      : course.$id,
+                                  )
+                                }
+                                className="text-blue-500 hover:bg-blue-100 px-2 rounded font-bold"
+                              >
+                                {activeVideoCourseId === course.$id ? "-" : "+"}
+                              </button>
+                            </div>
+
+                            {/* Acordeón: Formulario Inline para Videos */}
+                            {activeVideoCourseId === course.$id && (
+                              <form
+                                onSubmit={(e) =>
+                                  handleCreateVideo(e, course.$id)
+                                }
+                                className="space-y-2 mb-4 bg-blue-50 p-2 rounded"
+                              >
+                                <input
+                                  type="text"
+                                  placeholder="Nombre del video"
+                                  value={videoName}
+                                  onChange={(e) => setVideoName(e.target.value)}
+                                  className="w-full p-1 text-sm border rounded"
+                                  required
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="Código de YouTube"
+                                  value={youtubeCode}
+                                  onChange={(e) =>
+                                    setYoutubeCode(e.target.value)
+                                  }
+                                  className="w-full p-1 text-sm border rounded"
+                                  required
+                                />
+                                <button
+                                  type="submit"
+                                  disabled={createVideoMutation.isPending}
+                                  className="w-full bg-blue-500 text-white p-1 text-sm rounded"
+                                >
+                                  {createVideoMutation.isPending
+                                    ? "Guardando..."
+                                    : "Guardar"}
+                                </button>
+                              </form>
+                            )}
+
+                            <ul className="list-disc pl-5 text-sm space-y-1">
+                              {videos
+                                .filter((v: any) => v.courseId === course.$id)
+                                .map((video: any) => (
+                                  <li key={video.$id}>{video.name}</li>
+                                ))}
+                            </ul>
+                          </div>
+
+                          {/* Renderizar Archivos del Curso */}
+                          <div>
+                            <div className="flex justify-between items-center border-b pb-1 mb-2">
+                              <h5 className="font-semibold text-gray-700">
+                                Archivos
+                              </h5>
+                              <button
+                                onClick={() =>
+                                  setActiveFileCourseId(
+                                    activeFileCourseId === course.$id
+                                      ? null
+                                      : course.$id,
+                                  )
+                                }
+                                className="text-green-500 hover:bg-green-100 px-2 rounded font-bold"
+                              >
+                                {activeFileCourseId === course.$id ? "-" : "+"}
+                              </button>
+                            </div>
+
+                            {/* Acordeón: Formulario Inline para Archivos */}
+                            {activeFileCourseId === course.$id && (
+                              <form
+                                onSubmit={(e) =>
+                                  handleCreateFile(e, course.$id)
+                                }
+                                className="space-y-2 mb-4 bg-green-50 p-2 rounded"
+                              >
+                                <input
+                                  type="text"
+                                  placeholder="Nombre del archivo"
+                                  value={fileName}
+                                  onChange={(e) => setFileName(e.target.value)}
+                                  className="w-full p-1 text-sm border rounded"
+                                  required
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="URL del archivo"
+                                  value={fileRoute}
+                                  onChange={(e) => setFileRoute(e.target.value)}
+                                  className="w-full p-1 text-sm border rounded"
+                                  required
+                                />
+                                <button
+                                  type="submit"
+                                  disabled={createFileMutation.isPending}
+                                  className="w-full bg-green-500 text-white p-1 text-sm rounded"
+                                >
+                                  {createFileMutation.isPending
+                                    ? "Guardando..."
+                                    : "Guardar"}
+                                </button>
+                              </form>
+                            )}
+
+                            <ul className="list-disc pl-5 text-sm space-y-1">
+                              {files
+                                .filter((f: any) => f.courseId === course.$id)
+                                .map((file: any) => (
+                                  <li key={file.$id}>{file.name}</li>
+                                ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
