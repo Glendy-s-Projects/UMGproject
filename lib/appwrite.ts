@@ -218,5 +218,61 @@ export const updateTopic = async (topicId: string, newSemesterName: string) => {
   }
 };
 
+export const updateCourse = async (courseId: string, newCourseName: string) => {
+  try {
+    const updatedCourse = await databases.updateDocument(
+      appwriteConfig.databaseId!,
+      appwriteConfig.courseCollectionId!,
+      courseId,
+      { course: newCourseName }
+    );
+    return updatedCourse;
+  } catch (error) {
+    console.error("Error updating course:", error);
+    throw error;
+  }
+};
+
+export const updateVideo = async (
+  videoId: string,
+  newVideoName: string,
+  newYoutubeCode: string
+) => {
+  try {
+    const updatedVideo = await databases.updateDocument(
+      appwriteConfig.databaseId!,
+      appwriteConfig.videosCollectionId!,
+      videoId,
+      { name: newVideoName, youtubeCode: newYoutubeCode }
+    );
+    return updatedVideo;
+  } catch (error) {
+    console.error("Error updating video:", error);
+    throw error;
+  }
+};
+
+export const updateFile = async (
+  fileId: string,
+  newFileName: string,
+  newFileRoute: string
+) => {
+  try {
+    const updatedFile = await databases.updateDocument(
+      appwriteConfig.databaseId!,
+      appwriteConfig.filesCollectionId!,
+      fileId,
+      {
+        name: newFileName,
+        fileRoute: newFileRoute,
+      }
+    );
+    return updatedFile;
+  } catch (error) {
+    console.error("Error updating file:", error);
+    throw error;
+  }
+};
+
 export const account = new Account(client);
 export { ID } from "appwrite";

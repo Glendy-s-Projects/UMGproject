@@ -5,6 +5,10 @@ import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { PrecalculoProvider } from "@/context/PrecalculoProvider";
 import "./globals.css";
 import Providers from "./Providers";
+import { JetBrains_Mono } from "next/font/google";
+import { cn } from "@/context/lib/utils";
+
+const jetbrainsMono = JetBrains_Mono({subsets:['latin'],variable:'--font-mono'});
 
 export const metadata: Metadata = {
   title: "UMG Programms",
@@ -17,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={cn("font-mono", jetbrainsMono.variable)}>
       <body suppressHydrationWarning>
         <Providers>
           <AlgebraProvider>

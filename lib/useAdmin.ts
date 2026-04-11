@@ -10,6 +10,9 @@ import {
   getFiles,
   getVideos,
   updateTopic,
+  updateCourse,
+  updateVideo,
+  updateFile,
 } from "./appwrite";
 import { Course, Topic } from "../type";
 
@@ -40,6 +43,17 @@ export const useAdmin = () => {
 
   const [editingTopicId, setEditingTopicId] = useState<string | null>(null);
   const [editTopicName, setEditTopicName] = useState("");
+
+  const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
+  const [editCourseName, setEditCourseName] = useState("");
+
+  const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
+  const [editVideoName, setEditVideoName] = useState("");
+  const [editYoutubeCode, setEditYoutubeCode] = useState("");
+
+  const [editingFileId, setEditingFileId] = useState<string | null>(null);
+  const [editFileName, setEditFileName] = useState("");
+  const [editFileRoute, setEditFileRoute] = useState("");
 
   //-- Queries (Estado del servidor)---//
 
@@ -152,6 +166,63 @@ export const useAdmin = () => {
     onError: () => alert("Error al actualizar el tema"),
   });
 
+  const updateCourseMutation = useMutation({
+    mutationFn: ({
+      courseId,
+      newCourseName,
+    }: {
+      courseId: string;
+      newCourseName: string;
+    }) => updateCourse(courseId, newCourseName),
+    onSuccess: () => {
+      alert("Curso actualizado exitosamente");
+      queryClient.invalidateQueries({ queryKey: ["topics"] });
+      setEditingCourseId(null);
+      setEditCourseName("");
+    },
+    onError: () => alert("Error al actualizar el curso"),
+  });
+
+  const updateVideoMutation = useMutation({
+    mutationFn: ({
+      videoId,
+      newVideoName,
+      newYoutubeCode,
+    }: {
+      videoId: string;
+      newVideoName: string;
+      newYoutubeCode: string;
+    }) => updateVideo(videoId, newVideoName, newYoutubeCode),
+    onSuccess: () => {
+      alert("Video actualizado exitosamente");
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
+      setEditingVideoId(null);
+      setEditVideoName("");
+      setEditYoutubeCode("");
+    },
+    onError: () => alert("Error al actualizar el video"),
+  });
+
+  const updateFileMutation = useMutation({
+    mutationFn: ({
+      fileId,
+      newFileName,
+      newFileRoute,
+    }: {
+      fileId: string;
+      newFileName: string;
+      newFileRoute: string;
+    }) => updateFile(fileId, newFileName, newFileRoute),
+    onSuccess: () => {
+      alert("Archivo actualizado exitosamente");
+      queryClient.invalidateQueries({ queryKey: ["files"] });
+      setEditingFileId(null);
+      setEditFileName("");
+      setEditFileRoute("");
+    },
+    onError: () => alert("Error al actualizar el archivo"),
+  });
+
   //-- Manejadores de eventos --//
   const handleCreateCourse = (e: FormEvent) => {
     e.preventDefault();
@@ -211,5 +282,24 @@ export const useAdmin = () => {
     editingTopicId,
     setEditingTopicId,
     updateTopicMutation,
+    editCourseName,
+    setEditCourseName,
+    editingCourseId,
+    setEditingCourseId,
+    updateCourseMutation,
+    editingVideoId,
+    setEditingVideoId,
+    editVideoName,
+    setEditVideoName,
+    editYoutubeCode,
+    setEditYoutubeCode,
+    updateVideoMutation,
+    updateFileMutation,
+    editingFileId,
+    setEditingFileId,
+    editFileName,
+    setEditFileName,
+    editFileRoute,
+    setEditFileRoute,
   };
 };
