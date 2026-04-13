@@ -62,7 +62,7 @@ export const useAdmin = () => {
     queryFn: async () => {
       try {
         return await account.get();
-      } catch (error) {
+      } catch {
         return null;
       }
     },
