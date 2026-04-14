@@ -1,4 +1,9 @@
 import { SemesterType } from "@/types/index";
+import { LiaTerminalSolid } from "react-icons/lia";
+import { LiaHashtagSolid } from "react-icons/lia";
+import { PiSigmaThin } from "react-icons/pi";
+import { TbChartScatter3D } from "react-icons/tb";
+import { PiBuildingOfficeLight } from "react-icons/pi";
 
 export const SemesterRoutes: SemesterType[] = [
   {
@@ -8,6 +13,7 @@ export const SemesterRoutes: SemesterType[] = [
     routes: [],
     image: "/1.webp",
     bgColor: "#75fad7",
+    acronym: "1er",
   },
   {
     id: 2,
@@ -34,6 +40,7 @@ export const SemesterRoutes: SemesterType[] = [
             file: "https://drive.google.com/drive/folders/1cqIH25UKQGlKZg4XZs_w1Npq9NEVcnMo?usp=drive_link",
           },
         ],
+        icon: LiaTerminalSolid,
       },
       {
         id: 2,
@@ -120,6 +127,7 @@ export const SemesterRoutes: SemesterType[] = [
             file: "https://drive.google.com/drive/folders/1bLDdLOgMvMl6kUpS4_i80M0N4nzpDzCr?usp=sharing",
           },
         ],
+        icon: LiaHashtagSolid,
       },
       {
         id: 3,
@@ -171,6 +179,7 @@ export const SemesterRoutes: SemesterType[] = [
             file: "https://drive.google.com/drive/folders/1IC-IWt4Hz-70pWdKSjurKT8nNe1mVDD9?usp=sharing",
           },
         ],
+        icon: PiSigmaThin,
       },
       {
         id: 4,
@@ -192,6 +201,7 @@ export const SemesterRoutes: SemesterType[] = [
             file: "https://drive.google.com/drive/folders/1l4PZvpoxFMO85cL-exJRuBvyuTCH39RI?usp=sharing",
           },
         ],
+        icon: TbChartScatter3D,
       },
       {
         id: 5,
@@ -223,10 +233,12 @@ export const SemesterRoutes: SemesterType[] = [
             file: "https://drive.google.com/drive/folders/1LkQZL204S-4ic5xAeRCdVmra3UF5hhjM?usp=sharing",
           },
         ],
+        icon: PiBuildingOfficeLight,
       },
     ],
     image: "/2.webp",
     bgColor: "#facc15",
+    acronym: "2do",
   },
   {
     id: 3,
@@ -361,6 +373,7 @@ export const SemesterRoutes: SemesterType[] = [
     ],
     image: "/3.webp",
     bgColor: "#fca5a5",
+    acronym: "3er",
   },
 ];
 
@@ -375,7 +388,7 @@ export const getCursosBySemestreId = (semestreId: number) => {
 export const getTemasByCursoId = (semestreId: number, cursoId: number) => {
   return (
     SemesterRoutes.find((semester) => semester.id === semestreId)?.routes.find(
-      (curso) => curso.id === cursoId,
+      (curso) => curso.id === cursoId
     )?.subroutes || []
   );
 };

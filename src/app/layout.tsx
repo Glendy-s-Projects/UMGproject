@@ -12,6 +12,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/context/components/ui/sidebar";
+import { ToastContainer } from "react-toastify";
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
@@ -41,6 +42,7 @@ export default function RootLayout({
               <PrecalculoProvider>
                 <TooltipProvider>
                   <SidebarProvider defaultOpen={true}>
+                    <ToastContainer position="bottom-right" theme="colored" />
                     {children}
                     <GoogleAnalytics gaId="G-4DQL7T0JLJ" />
                     <GoogleTagManager gtmId="GTM-TG63XJCB" />
