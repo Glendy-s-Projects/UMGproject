@@ -13,10 +13,14 @@ import {
   updateCourse,
   updateVideo,
   updateFile,
+  deleteCourse,
+  deleteVideo,
+  deleteFile,
 } from "./appwrite";
 import { Course, Topic } from "../type";
+import { toast } from "react-toastify";
 
-export const useAdmin = () => {
+export const useAdmin = (activeTopicId?: string | null) => {
   const queryClient = useQueryClient();
 
   //--Estados de Formularios (Estado del cliente)--//
@@ -76,21 +80,26 @@ export const useAdmin = () => {
   });
 
   const { data: courses = [] } = useQuery({
-    queryKey: ["courses"],
-    queryFn: async () => ((await getCourses()) || []) as unknown as Course[],
-    enabled: !!user,
+    queryKey: ["courses", activeTopicId],
+    queryFn: async () => {
+      if (!activeTopicId) return [];
+      return ((await getCourses(activeTopicId)) || []) as unknown as Course[];
+    },
+    enabled: !!user && !!activeTopicId,
   });
 
+  const courseIds = (courses as unknown as Course[]).map((c) => c.$id);
+
   const { data: files = [] } = useQuery({
-    queryKey: ["files"],
-    queryFn: async () => (await getFiles()) || [],
-    enabled: !!user,
+    queryKey: ["files", courseIds],
+    queryFn: async () => (await getFiles(courseIds)) || [],
+    enabled: !!user && courseIds.length > 0,
   });
 
   const { data: videos = [] } = useQuery({
-    queryKey: ["videos"],
-    queryFn: async () => (await getVideos()) || [],
-    enabled: !!user,
+    queryKey: ["videos", courseIds],
+    queryFn: async () => (await getVideos(courseIds)) || [],
+    enabled: !!user && courseIds.length > 0,
   });
 
   //----MUTATIONS (Acciones)----//
@@ -102,7 +111,7 @@ export const useAdmin = () => {
     onSuccess: (userData) => queryClient.setQueryData(["user"], userData),
     onError: () => {
       queryClient.setQueryData(["user"], null);
-      alert("Error al iniciar sesión. Verifica tus credenciales.");
+      toast.error("Error al iniciar sesión. Verifica tus credenciales.");
     },
   });
 
@@ -115,36 +124,36 @@ export const useAdmin = () => {
   const createCourseMutation = useMutation({
     mutationFn: () => createCourse(courseName, selectedTopic),
     onSuccess: () => {
-      alert("Curso agregado exitosamente");
+      toast.success("Curso agregado exitosamente");
       setCourseName("");
       queryClient.invalidateQueries({ queryKey: ["courses"] });
     },
-    onError: () => alert("Error al agregar curso"),
+    onError: () => toast.error("Error al agregar curso"),
   });
 
   const createVideoMutation = useMutation({
     mutationFn: (courseId: string) =>
       createVideo(videoName, youtubeCode, courseId),
     onSuccess: () => {
-      alert("Video agregado exitosamente");
+      toast.success("Video agregado exitosamente");
       setVideoName("");
       setYoutubeCode("");
       setActiveVideoCourseId(null);
       queryClient.invalidateQueries({ queryKey: ["videos"] });
     },
-    onError: () => alert("Error al agregar video"),
+    onError: () => toast.error("Error al agregar video"),
   });
 
   const createFileMutation = useMutation({
     mutationFn: (courseId: string) => createFile(fileName, fileRoute, courseId),
     onSuccess: () => {
-      alert("Archivo agregado exitosamente");
+      toast.success("Archivo agregado exitosamente");
       setFileName("");
       setFileRoute("");
       setActiveFileCourseId(null);
       queryClient.invalidateQueries({ queryKey: ["files"] });
     },
-    onError: () => alert("Error al agregar archivo"),
+    onError: () => toast.error("Error al agregar archivo"),
   });
 
   //---CRUD de Topics---//
@@ -158,12 +167,12 @@ export const useAdmin = () => {
       newSemesterName: string;
     }) => updateTopic(topicId, newSemesterName),
     onSuccess: () => {
-      alert("Tema actualizado exitosamente");
+      toast.success("Tema actualizado exitosamente");
       queryClient.invalidateQueries({ queryKey: ["topics"] });
       setEditingTopicId(null);
       setEditTopicName("");
     },
-    onError: () => alert("Error al actualizar el tema"),
+    onError: () => toast.error("Error al actualizar el tema"),
   });
 
   const updateCourseMutation = useMutation({
@@ -175,12 +184,12 @@ export const useAdmin = () => {
       newCourseName: string;
     }) => updateCourse(courseId, newCourseName),
     onSuccess: () => {
-      alert("Curso actualizado exitosamente");
+      toast.success("Curso actualizado exitosamente");
       queryClient.invalidateQueries({ queryKey: ["topics"] });
       setEditingCourseId(null);
       setEditCourseName("");
     },
-    onError: () => alert("Error al actualizar el curso"),
+    onError: () => toast.error("Error al actualizar el curso"),
   });
 
   const updateVideoMutation = useMutation({
@@ -194,13 +203,13 @@ export const useAdmin = () => {
       newYoutubeCode: string;
     }) => updateVideo(videoId, newVideoName, newYoutubeCode),
     onSuccess: () => {
-      alert("Video actualizado exitosamente");
+      toast.success("Video actualizado exitosamente");
       queryClient.invalidateQueries({ queryKey: ["videos"] });
       setEditingVideoId(null);
       setEditVideoName("");
       setEditYoutubeCode("");
     },
-    onError: () => alert("Error al actualizar el video"),
+    onError: () => toast.error("Error al actualizar el video"),
   });
 
   const updateFileMutation = useMutation({
@@ -214,13 +223,41 @@ export const useAdmin = () => {
       newFileRoute: string;
     }) => updateFile(fileId, newFileName, newFileRoute),
     onSuccess: () => {
-      alert("Archivo actualizado exitosamente");
+      toast.success("Archivo actualizado exitosamente");
       queryClient.invalidateQueries({ queryKey: ["files"] });
       setEditingFileId(null);
       setEditFileName("");
       setEditFileRoute("");
     },
-    onError: () => alert("Error al actualizar el archivo"),
+    onError: () => toast.error("Error al actualizar el archivo"),
+  });
+
+  //-- DELETE --//
+  const deleteCourseMutation = useMutation({
+    mutationFn: (courseId: string) => deleteCourse(courseId),
+    onSuccess: () => {
+      toast.success("Curso eliminado exitosamente");
+      queryClient.invalidateQueries({ queryKey: ["topics"] });
+    },
+    onError: () => toast.error("Error al eliminar el curso"),
+  });
+
+  const deleteVideoMutation = useMutation({
+    mutationFn: (videoId: string) => deleteVideo(videoId),
+    onSuccess: () => {
+      toast.success("Video eliminado exitosamente");
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
+    },
+    onError: () => toast.error("Error al eliminar el video"),
+  });
+
+  const deleteFileMutation = useMutation({
+    mutationFn: (fileId: string) => deleteFile(fileId),
+    onSuccess: () => {
+      toast.success("Archivo eliminado exitosamente");
+      queryClient.invalidateQueries({ queryKey: ["files"] });
+    },
+    onError: () => toast.error("Error al eliminar el archivo"),
   });
 
   //-- Manejadores de eventos --//
@@ -301,5 +338,8 @@ export const useAdmin = () => {
     setEditFileName,
     editFileRoute,
     setEditFileRoute,
+    deleteCourseMutation,
+    deleteVideoMutation,
+    deleteFileMutation,
   };
 };

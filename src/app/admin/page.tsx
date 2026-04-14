@@ -1,7 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { HiLogout } from "react-icons/hi";
 import { useAdmin } from "../../../lib/useAdmin";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FaExpeditedssl, FaRegAddressBook } from "react-icons/fa6";
 import { FaEdit } from "react-icons/fa";
 import { RxVideo } from "react-icons/rx";
@@ -26,6 +27,8 @@ import {
   CollapsibleTrigger,
 } from "@/context/components/ui/collapsible";
 import { IoIosArrowDown } from "react-icons/io";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Definimos la estructura de los datos que vienen de la base de datos
 interface CourseData {
@@ -50,10 +53,13 @@ interface FileData {
 interface TopicData {
   $id: string;
   semester: string;
-  course: CourseData[];
 }
 
-const LoginPage = () => {
+const AdminPanelContent = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const activeTopicId = searchParams.get("topicId");
+
   const {
     email,
     setEmail,
@@ -72,6 +78,7 @@ const LoginPage = () => {
     user,
     isUserLoading,
     topics,
+    courses,
     files,
     videos,
     loginMutation,
@@ -108,15 +115,16 @@ const LoginPage = () => {
     editFileRoute,
     setEditFileRoute,
     updateFileMutation,
-  } = useAdmin();
-
-  const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
+    deleteCourseMutation,
+    deleteVideoMutation,
+    deleteFileMutation,
+  } = useAdmin(activeTopicId);
 
   useEffect(() => {
     if (topics && topics.length > 0 && !activeTopicId) {
-      setActiveTopicId(topics[0].$id);
+      router.replace(`?topicId=${topics[0].$id}`);
     }
-  }, [topics, activeTopicId]);
+  }, [topics, activeTopicId, router]);
 
   const activeTopic = topics?.find((t: TopicData) => t.$id === activeTopicId);
 
@@ -127,6 +135,7 @@ const LoginPage = () => {
   if (user) {
     return (
       <>
+        <ToastContainer position="bottom-right" theme="colored" />
         <Sidebar
           collapsible="icon"
           className="z-40 border-r border-outline-variant/15 bg-neutral-50/60 dark:bg-neutral-950/60 backdrop-blur-2xl"
@@ -146,7 +155,7 @@ const LoginPage = () => {
                           : "bg-neutral-200/50 dark:bg-neutral-800/50 text-neutral-900 dark:text-neutral-50 hover:bg-neutral-300/50 dark:hover:bg-neutral-700/50"
                       }`}
                     >
-                      <button onClick={() => setActiveTopicId(topic.$id)}>
+                      <button onClick={() => router.push(`?topicId=${topic.$id}`)}>
                         <span className="flex items-center justify-center">
                           <FaRegAddressBook size={18} />
                         </span>
@@ -215,9 +224,9 @@ const LoginPage = () => {
           </header>
 
           <main className="flex-1 px-4 md:px-8 py-8 md:py-12 max-w-screen-xl w-full mx-auto">
-            <section className="pb-12 flex flex-col items-start gap-6">
-              <div className="w-full flex justify-between items-end">
-                <div className="space-y-1 w-full max-w-3xl">
+            <section className=" flex flex-col items-start gap-6">
+              <div className="w-full flex justify-between items-end border-b-2 border-outline-variant/30 pb-2">
+                <div className="space-y-1 w-full max-w-3xl ">
                   {activeTopic && editingTopicId === activeTopic.$id ? (
                     <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 w-full">
                       <input
@@ -251,7 +260,7 @@ const LoginPage = () => {
                       </div>
                     </div>
                   ) : (
-                    <h1 className="text-[3.5rem] font-black leading-[0.9] tracking-tighter text-on-surface">
+                    <h1 className="text-[2.5rem] pb-6 font-black leading-[0.9] tracking-tighter text-on-surface">
                       {activeTopic?.semester || "Seleccionar Semestre"}
                     </h1>
                   )}
@@ -273,12 +282,20 @@ const LoginPage = () => {
               </div>
             </section>
 
-            <div className="space-y-16">
-              {activeTopic?.course.map((course: CourseData) => (
-                <Collapsible
-                  className="bg-surface-container-low p-8 md:p-12 rounded-xl"
-                  key={course.$id}
-                >
+            <div className="space-y-2">
+              {(courses || []).map((course: CourseData) => {
+                const courseVideos = ((videos || []) as unknown as VideoData[]).filter(
+                  (v) => v.courseId === course.$id
+                );
+                const courseFiles = ((files || []) as unknown as FileData[]).filter(
+                  (f) => f.courseId === course.$id
+                );
+
+                return (
+                  <Collapsible
+                    className="bg-surface-container-low p-2  rounded-xl"
+                    key={course.$id}
+                  >
                   <div className="flex justify-between items-start mb-4">
                     <div className="w-full">
                       {activeTopic && editingCourseId === course.$id ? (
@@ -315,31 +332,44 @@ const LoginPage = () => {
                         </div>
                       ) : (
                         <CollapsibleTrigger className="group flex items-center gap-3 hover:text-primary transition-colors text-left outline-none w-full">
-                          <span className="material-symbols-outlined text-4xl transition-transform duration-300 group-data-[state=open]:rotate-180">
+                          <span className="material-symbols-outlined text-2xl transition-transform duration-300 group-data-[state=open]:rotate-180">
                             <IoIosArrowDown />
                           </span>
-                          <h2 className="text-4xl font-bold tracking-tight text-on-surface">
+                          <h2 className="text-2xl font-bold tracking-tight  text-on-surface">
                             {course.course}
                           </h2>
                         </CollapsibleTrigger>
                       )}
                     </div>
                     {!editingCourseId && activeTopic && (
-                      <button
-                        className="text-on-surface-variant hover:text-on-surface transition-colors p-2 flex items-center gap-2 ml-4 shrink-0"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingCourseId(course.$id);
-                          setEditCourseName(course.course);
-                        }}
-                      >
-                        <span className="material-symbols-outlined">
-                          <FaEdit />
-                        </span>
-                        <span className="text-xs font-bold uppercase tracking-widest">
-                          Editar
-                        </span>
-                      </button>
+                      <div className="flex items-center gap-2 ml-4 shrink-0">
+                        <button
+                          className="text-on-surface-variant hover:text-on-surface transition-colors p-2 flex items-center gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingCourseId(course.$id);
+                            setEditCourseName(course.course);
+                          }}
+                        >
+                          <span className="material-symbols-outlined text-sm">
+                            <FaEdit />
+                          </span>
+                        </button>
+                        <button
+                          className="text-on-surface-variant hover:text-error transition-colors p-2 flex items-center gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm("¿Estás seguro de que deseas eliminar este curso?")) {
+                              deleteCourseMutation.mutate(course.$id);
+                            }
+                          }}
+                          disabled={deleteCourseMutation.isPending}
+                        >
+                          <span className="material-symbols-outlined text-sm">
+                            <MdDeleteOutline />
+                          </span>
+                        </button>
+                      </div>
                     )}
                   </div>
                   <CollapsibleContent>
@@ -397,9 +427,7 @@ const LoginPage = () => {
                         )}
 
                         <ul className="space-y-2">
-                          {(videos as unknown as VideoData[])
-                            .filter((v) => v.courseId === course.$id)
-                            .map((video) =>
+                          {courseVideos.map((video) =>
                               editingVideoId === video.$id ? (
                                 <li
                                   key={video.$id}
@@ -473,7 +501,15 @@ const LoginPage = () => {
                                     >
                                       <FaEdit />
                                     </button>
-                                    <button className="material-symbols-outlined text-sm text-on-surface-variant hover:text-error transition-colors">
+                                    <button
+                                      className="material-symbols-outlined text-sm text-on-surface-variant hover:text-error transition-colors"
+                                      onClick={() => {
+                                        if (window.confirm("¿Estás seguro de que deseas eliminar este video?")) {
+                                          deleteVideoMutation.mutate(video.$id);
+                                        }
+                                      }}
+                                      disabled={deleteVideoMutation.isPending}
+                                    >
                                       <MdDeleteOutline />
                                     </button>
                                   </div>
@@ -537,9 +573,7 @@ const LoginPage = () => {
                         )}
 
                         <div className="flex flex-wrap gap-3">
-                          {(files as unknown as FileData[])
-                            .filter((f) => f.courseId === course.$id)
-                            .map((file) =>
+                          {courseFiles.map((file) =>
                               editingFileId === file.$id ? (
                                 <div
                                   key={file.$id}
@@ -608,9 +642,17 @@ const LoginPage = () => {
                                         <FaEdit />
                                       </span>
                                     </button>
-                                    <button className="w-6 h-6 rounded-full hover:bg-error/10 flex items-center justify-center text-error transition-colors">
+                                    <button
+                                      className="w-6 h-6 rounded-full hover:bg-error/10 flex items-center justify-center text-error transition-colors"
+                                      onClick={() => {
+                                        if (window.confirm("¿Estás seguro de que deseas eliminar este archivo?")) {
+                                          deleteFileMutation.mutate(file.$id);
+                                        }
+                                      }}
+                                      disabled={deleteFileMutation.isPending}
+                                    >
                                       <span className="material-symbols-outlined text-xs">
-                                        delete
+                                        <MdDeleteOutline />
                                       </span>
                                     </button>
                                   </div>
@@ -622,7 +664,8 @@ const LoginPage = () => {
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
-              ))}
+              );
+            })}
             </div>
           </main>
         </SidebarInset>
@@ -632,6 +675,7 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <ToastContainer position="bottom-right" theme="colored" />
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
         <h2 className="text-2xl font-bold mb-6 text-center">Iniciar Sesión</h2>
         <form className="space-y-4">
@@ -673,6 +717,14 @@ const LoginPage = () => {
         </form>
       </div>
     </div>
+  );
+};
+
+const LoginPage = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-100">Cargando Panel...</div>}>
+      <AdminPanelContent />
+    </Suspense>
   );
 };
 

@@ -85,21 +85,11 @@ export const getTopics = async () => {
     const topics = await databases.listDocuments(
       appwriteConfig.databaseId!,
       appwriteConfig.topicCollectionId!,
-      []
+      [Query.limit(100)]
     );
 
     if (topics.documents.length > 0) {
-      const topicsWithCourses = await Promise.all(
-        topics.documents.map(async (topic) => {
-          const courses = await databases.listDocuments(
-            appwriteConfig.databaseId!,
-            appwriteConfig.courseCollectionId!,
-            [Query.equal("topicId", topic.$id)]
-          );
-          return { ...topic, course: courses.documents };
-        })
-      );
-      return topicsWithCourses;
+      return topics.documents;
     }
     return null;
   } catch (error) {
@@ -108,12 +98,12 @@ export const getTopics = async () => {
   }
 };
 
-export const getCourses = async () => {
+export const getCourses = async (topicId: string) => {
   try {
     const courses = await databases.listDocuments(
       appwriteConfig.databaseId!,
       appwriteConfig.courseCollectionId!,
-      []
+      [Query.equal("topicId", topicId), Query.limit(100)]
     );
 
     if (courses.documents.length > 0) {
@@ -126,12 +116,13 @@ export const getCourses = async () => {
   }
 };
 
-export const getFiles = async () => {
+export const getFiles = async (courseIds: string[]) => {
+  if (!courseIds || courseIds.length === 0) return [];
   try {
     const files = await databases.listDocuments(
       appwriteConfig.databaseId!,
       appwriteConfig.filesCollectionId!,
-      []
+      [Query.equal("courseId", courseIds), Query.limit(500)]
     );
 
     if (files.documents.length > 0) {
@@ -144,12 +135,13 @@ export const getFiles = async () => {
   }
 };
 
-export const getVideos = async () => {
+export const getVideos = async (courseIds: string[]) => {
+  if (!courseIds || courseIds.length === 0) return [];
   try {
     const videos = await databases.listDocuments(
       appwriteConfig.databaseId!,
       appwriteConfig.videosCollectionId!,
-      []
+      [Query.equal("courseId", courseIds), Query.limit(500)]
     );
 
     if (videos.documents.length > 0) {
@@ -181,14 +173,14 @@ export const getCourseByName = async (courseName: string) => {
     const videos = await databases.listDocuments(
       appwriteConfig.databaseId!,
       appwriteConfig.videosCollectionId!,
-      [Query.equal("courseId", course.$id)]
+      [Query.equal("courseId", course.$id), Query.limit(500)]
     );
 
     // 3. Obtener archivos del curso
     const files = await databases.listDocuments(
       appwriteConfig.databaseId!,
       appwriteConfig.filesCollectionId!,
-      [Query.equal("courseId", course.$id)]
+      [Query.equal("courseId", course.$id), Query.limit(500)]
     );
 
     return {
@@ -270,6 +262,49 @@ export const updateFile = async (
     return updatedFile;
   } catch (error) {
     console.error("Error updating file:", error);
+    throw error;
+  }
+};
+
+//-- DELETE --//
+export const deleteCourse = async (courseId: string) => {
+  try {
+    const result = await databases.deleteDocument(
+      appwriteConfig.databaseId!,
+      appwriteConfig.courseCollectionId!,
+      courseId
+    );
+    return result;
+  } catch (error) {
+    console.error("Error deleting course:", error);
+    throw error;
+  }
+};
+
+export const deleteVideo = async (videoId: string) => {
+  try {
+    const result = await databases.deleteDocument(
+      appwriteConfig.databaseId!,
+      appwriteConfig.videosCollectionId!,
+      videoId
+    );
+    return result;
+  } catch (error) {
+    console.error("Error deleting video:", error);
+    throw error;
+  }
+};
+
+export const deleteFile = async (fileId: string) => {
+  try {
+    const result = await databases.deleteDocument(
+      appwriteConfig.databaseId!,
+      appwriteConfig.filesCollectionId!,
+      fileId
+    );
+    return result;
+  } catch (error) {
+    console.error("Error deleting file:", error);
     throw error;
   }
 };
