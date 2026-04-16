@@ -1,15 +1,22 @@
 "use client";
-import SubTitleCards from "@/components/SubTitleCards";
-import TitleCourse from "@/components/TitleCourse";
+import AppLayout from "@/components/AppLayout";
+import MainSemesterLayout from "@/components/MainSemesterLayout";
+import useCourseData from "@/hooks/useCourseData";
 import { Fisica1Slugs } from "@/utils/data/routes";
 import React from "react";
 
 const Fisica1 = () => {
+  const { videos, files, loading } = useCourseData("Fisica 1");
   return (
-    <div className="min-h-screen p-4 w-full flex flex-col gap-2 bg-gray-100">
-      <TitleCourse course="Fisica 1" />
-      <SubTitleCards slugLinks={Fisica1Slugs} bgColor="bg-green-300" />
-    </div>
+    <AppLayout title="Física 1" activeTopicId="2">
+      <MainSemesterLayout
+        title="Física 1"
+        slugs={Fisica1Slugs}
+        videos={videos}
+        files={files}
+        loading={loading}
+      />
+    </AppLayout>
   );
 };
 

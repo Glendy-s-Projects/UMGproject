@@ -1,15 +1,22 @@
 "use client";
 import { MatematicaDiscretaSlugs } from "@/utils/data/routes";
 import React from "react";
-import SubTitleCards from "@/components/SubTitleCards";
-import TitleCourse from "@/components/TitleCourse";
+import AppLayout from "@/components/AppLayout";
+import MainSemesterLayout from "@/components/MainSemesterLayout";
+import useCourseData from "@/hooks/useCourseData";
 
 const MatematicaDiscreta = () => {
+  const { videos, files, loading } = useCourseData("Matemática Discreta");
   return (
-    <section className="flex flex-col gap-2  min-h-screen bg-gray-100 p-4">
-      <TitleCourse course="Matemática Discreta" />
-      <SubTitleCards slugLinks={MatematicaDiscretaSlugs} bgColor="bg-amber-300" />
-    </section>
+    <AppLayout title="Matemática Discreta" activeTopicId="4">
+      <MainSemesterLayout
+        title="Matemática Discreta"
+        slugs={MatematicaDiscretaSlugs}
+        videos={videos}
+        files={files}
+        loading={loading}
+      />
+    </AppLayout>
   );
 };
 

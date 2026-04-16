@@ -1,16 +1,21 @@
 "use client";
-import SubTitleCards from "@/components/SubTitleCards";
-import TitleCourse from "@/components/TitleCourse";
+import AppLayout from "@/components/AppLayout";
+import MainSemesterLayout from "@/components/MainSemesterLayout";
+import useCourseData from "@/hooks/useCourseData";
 import { AlgoritmoSlugs } from "@/utils/data/routes";
 
 const Algoritmos = () => {
-
-
+  const { videos, files, loading } = useCourseData("Algoritmos");
   return (
-    <section className="flex flex-col gap-2  min-h-screen bg-gray-100 p-4">
-      <TitleCourse course="Algoritmos" />
-      <SubTitleCards slugLinks={AlgoritmoSlugs} bgColor="bg-green-100" />
-    </section>
+    <AppLayout title="Algoritmos" activeTopicId="3">
+      <MainSemesterLayout
+        title="Algoritmos"
+        slugs={AlgoritmoSlugs}
+        videos={videos}
+        files={files}
+        loading={loading}
+      />
+    </AppLayout>
   );
 };
 
