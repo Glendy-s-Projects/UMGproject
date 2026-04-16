@@ -1,23 +1,13 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
-import { HiLogout } from "react-icons/hi";
 import { useAdmin } from "../../../lib/useAdmin";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FaExpeditedssl, FaRegAddressBook } from "react-icons/fa6";
 import { FaEdit } from "react-icons/fa";
 import { RxVideo } from "react-icons/rx";
 import { IoIosAdd } from "react-icons/io";
 import { MdOutlineUploadFile } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter,
   SidebarTrigger,
   SidebarInset,
 } from "@/context/components/ui/sidebar";
@@ -29,6 +19,7 @@ import {
 import { IoIosArrowDown } from "react-icons/io";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import AppSidebar from "@/components/Sidebar";
 
 // Definimos la estructura de los datos que vienen de la base de datos
 interface CourseData {
@@ -135,75 +126,14 @@ const AdminPanelContent = () => {
   if (user) {
     return (
       <>
-        <ToastContainer position="bottom-right" theme="colored" />
-        <Sidebar
-          collapsible="icon"
-          className="z-40 border-r border-outline-variant/15 bg-neutral-50/60 dark:bg-neutral-950/60 backdrop-blur-2xl"
-        >
-          <SidebarContent className="px-4">
-            <SidebarGroup>
-              <SidebarMenu className="flex flex-col gap-2">
-                {topics.map((topic) => (
-                  <SidebarMenuItem key={topic.$id}>
-                    <SidebarMenuButton
-                      asChild
-                      tooltip={topic.semester}
-                      isActive={activeTopicId === topic.$id}
-                      className={`flex items-center w-full p-3 rounded-lg font-bold transition-all duration-300 cursor-pointer h-auto ${
-                        activeTopicId === topic.$id
-                          ? "bg-primary text-white hover:bg-primary/90 hover:text-white"
-                          : "bg-neutral-200/50 dark:bg-neutral-800/50 text-neutral-900 dark:text-neutral-50 hover:bg-neutral-300/50 dark:hover:bg-neutral-700/50"
-                      }`}
-                    >
-                      <button onClick={() => router.push(`?topicId=${topic.$id}`)}>
-                        <span className="flex items-center justify-center">
-                          <FaRegAddressBook size={18} />
-                        </span>
-                        <span className="font-inter text-sm font-medium tracking-wide uppercase group-data-[collapsible=icon]:hidden">
-                          {topic.semester}
-                        </span>
-                      </button>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroup>
-          </SidebarContent>
-          <SidebarFooter className="p-4 space-y-4">
-            <div className="group-data-[collapsible=icon]:hidden w-full">
-              <button className="w-full bg-primary text-white py-3 px-4 rounded-md font-bold text-sm uppercase tracking-widest hover:bg-primary/90 transition-colors">
-                New Course
-              </button>
-            </div>
-            <div className="hidden group-data-[collapsible=icon]:flex w-full justify-center">
-              <button
-                className="bg-primary text-white p-2 rounded-md font-bold hover:bg-primary/90 transition-colors"
-                title="New Course"
-              >
-                <IoIosAdd size={20} />
-              </button>
-            </div>
-            <div className="flex flex-col space-y-1">
-              <SidebarMenuButton
-                asChild
-                tooltip="Cerrar Sesión"
-                className="flex items-center w-full p-3 h-auto text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50 transition-all ease-in-out rounded-lg cursor-pointer"
-              >
-                <button
-                  onClick={() => logoutMutation.mutate()}
-                  disabled={logoutMutation.isPending}
-                >
-                  <span className="flex items-center justify-center">
-                    <HiLogout size={18} />
-                  </span>
-                  <span className="font-inter text-sm font-medium tracking-wide uppercase group-data-[collapsible=icon]:hidden">
-                    {logoutMutation.isPending ? "Cerrando" : "Cerrar Sesión"}
-                  </span>
-                </button>
-              </SidebarMenuButton>
-            </div>
-          </SidebarFooter>
-        </Sidebar>
+        <AppSidebar
+          topics={topics}
+          activeTopicId={activeTopicId}
+          onTopicSelect={(id) => router.push(`?topicId=${id}`)}
+          onLogout={() => logoutMutation.mutate()}
+          isLogoutPending={logoutMutation.isPending}
+          isAdmin={true}
+        />
 
         <SidebarInset className="flex flex-col flex-1 w-full bg-background transition-all duration-200 ease-linear">
           <header className="sticky top-0 w-full z-30 bg-neutral-50/80 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-outline-variant/15">
@@ -284,150 +214,156 @@ const AdminPanelContent = () => {
 
             <div className="space-y-2">
               {(courses || []).map((course: CourseData) => {
-                const courseVideos = ((videos || []) as unknown as VideoData[]).filter(
-                  (v) => v.courseId === course.$id
-                );
-                const courseFiles = ((files || []) as unknown as FileData[]).filter(
-                  (f) => f.courseId === course.$id
-                );
+                const courseVideos = (
+                  (videos || []) as unknown as VideoData[]
+                ).filter((v) => v.courseId === course.$id);
+                const courseFiles = (
+                  (files || []) as unknown as FileData[]
+                ).filter((f) => f.courseId === course.$id);
 
                 return (
                   <Collapsible
                     className="bg-surface-container-low p-2  rounded-xl"
                     key={course.$id}
                   >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="w-full">
-                      {activeTopic && editingCourseId === course.$id ? (
-                        <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 w-full mb-8">
-                          <input
-                            type="text"
-                            value={editCourseName}
-                            onChange={(e) => setEditCourseName(e.target.value)}
-                            className="w-full text-[2.5rem] font-black leading-[0.9] tracking-tighter text-on-surface bg-transparent border-b-4 border-primary focus:outline-none"
-                            autoFocus
-                          />
-                          <div className="flex gap-2 pb-1">
-                            <button
-                              onClick={() =>
-                                updateCourseMutation.mutate({
-                                  courseId: course.$id,
-                                  newCourseName: editCourseName,
-                                })
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="w-full">
+                        {activeTopic && editingCourseId === course.$id ? (
+                          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 w-full mb-8">
+                            <input
+                              type="text"
+                              value={editCourseName}
+                              onChange={(e) =>
+                                setEditCourseName(e.target.value)
                               }
-                              disabled={updateCourseMutation.isPending}
-                              className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded font-bold text-sm uppercase transition-colors"
-                            >
-                              {updateCourseMutation.isPending
-                                ? "Guardando..."
-                                : "Guardar"}
-                            </button>
-                            <button
-                              className="bg-surface-container-highest hover:bg-surface-dim text-on-surface px-4 py-2 rounded font-bold text-sm uppercase transition-colors"
-                              onClick={() => setEditingCourseId(null)}
-                            >
-                              Cancelar
-                            </button>
+                              className="w-full text-[2.5rem] font-black leading-[0.9] tracking-tighter text-on-surface bg-transparent border-b-4 border-primary focus:outline-none"
+                              autoFocus
+                            />
+                            <div className="flex gap-2 pb-1">
+                              <button
+                                onClick={() =>
+                                  updateCourseMutation.mutate({
+                                    courseId: course.$id,
+                                    newCourseName: editCourseName,
+                                  })
+                                }
+                                disabled={updateCourseMutation.isPending}
+                                className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded font-bold text-sm uppercase transition-colors"
+                              >
+                                {updateCourseMutation.isPending
+                                  ? "Guardando..."
+                                  : "Guardar"}
+                              </button>
+                              <button
+                                className="bg-surface-container-highest hover:bg-surface-dim text-on-surface px-4 py-2 rounded font-bold text-sm uppercase transition-colors"
+                                onClick={() => setEditingCourseId(null)}
+                              >
+                                Cancelar
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <CollapsibleTrigger className="group flex items-center gap-3 hover:text-primary transition-colors text-left outline-none w-full">
-                          <span className="material-symbols-outlined text-2xl transition-transform duration-300 group-data-[state=open]:rotate-180">
-                            <IoIosArrowDown />
-                          </span>
-                          <h2 className="text-2xl font-bold tracking-tight  text-on-surface">
-                            {course.course}
-                          </h2>
-                        </CollapsibleTrigger>
-                      )}
-                    </div>
-                    {!editingCourseId && activeTopic && (
-                      <div className="flex items-center gap-2 ml-4 shrink-0">
-                        <button
-                          className="text-on-surface-variant hover:text-on-surface transition-colors p-2 flex items-center gap-2"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingCourseId(course.$id);
-                            setEditCourseName(course.course);
-                          }}
-                        >
-                          <span className="material-symbols-outlined text-sm">
-                            <FaEdit />
-                          </span>
-                        </button>
-                        <button
-                          className="text-on-surface-variant hover:text-error transition-colors p-2 flex items-center gap-2"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (window.confirm("¿Estás seguro de que deseas eliminar este curso?")) {
-                              deleteCourseMutation.mutate(course.$id);
-                            }
-                          }}
-                          disabled={deleteCourseMutation.isPending}
-                        >
-                          <span className="material-symbols-outlined text-sm">
-                            <MdDeleteOutline />
-                          </span>
-                        </button>
+                        ) : (
+                          <CollapsibleTrigger className="group flex items-center gap-3 hover:text-primary transition-colors text-left outline-none w-full">
+                            <span className="material-symbols-outlined text-2xl transition-transform duration-300 group-data-[state=open]:rotate-180">
+                              <IoIosArrowDown />
+                            </span>
+                            <h2 className="text-2xl font-bold tracking-tight  text-on-surface">
+                              {course.course}
+                            </h2>
+                          </CollapsibleTrigger>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <CollapsibleContent>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pt-8 mt-4 border-t border-outline-variant/15">
-                      <div className="space-y-6">
-                        <div className="flex justify-between items-center border-b border-outline-variant/15 pb-4">
-                          <h3 className="font-black text-xl uppercase tracking-tighter">
-                            Videos
-                          </h3>
+                      {!editingCourseId && activeTopic && (
+                        <div className="flex items-center gap-2 ml-4 shrink-0">
                           <button
-                            className="material-symbols-outlined text-primary-fixed"
-                            onClick={() =>
-                              setActiveVideoCourseId(
-                                activeVideoCourseId === course.$id
-                                  ? null
-                                  : course.$id,
-                              )
-                            }
+                            className="text-on-surface-variant hover:text-on-surface transition-colors p-2 flex items-center gap-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingCourseId(course.$id);
+                              setEditCourseName(course.course);
+                            }}
                           >
-                            <IoIosAdd />
+                            <span className="material-symbols-outlined text-sm">
+                              <FaEdit />
+                            </span>
+                          </button>
+                          <button
+                            className="text-on-surface-variant hover:text-error transition-colors p-2 flex items-center gap-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (
+                                window.confirm(
+                                  "¿Estás seguro de que deseas eliminar este curso?",
+                                )
+                              ) {
+                                deleteCourseMutation.mutate(course.$id);
+                              }
+                            }}
+                            disabled={deleteCourseMutation.isPending}
+                          >
+                            <span className="material-symbols-outlined text-sm">
+                              <MdDeleteOutline />
+                            </span>
                           </button>
                         </div>
-                        {/* Acordeón: Formulario Inline para Videos */}
-                        {activeVideoCourseId === course.$id && (
-                          <form
-                            onSubmit={(e) => handleCreateVideo(e, course.$id)}
-                            className="space-y-2 mb-4 bg-white p-2 rounded"
-                          >
-                            <input
-                              type="text"
-                              placeholder="Nombre del video"
-                              value={videoName}
-                              onChange={(e) => setVideoName(e.target.value)}
-                              className="w-full p-1 text-sm border rounded"
-                              required
-                            />
-                            <input
-                              type="text"
-                              placeholder="Código de YouTube"
-                              value={youtubeCode}
-                              onChange={(e) => setYoutubeCode(e.target.value)}
-                              className="w-full p-1 text-sm border rounded"
-                              required
-                            />
+                      )}
+                    </div>
+                    <CollapsibleContent>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pt-8 mt-4 border-t border-outline-variant/15">
+                        <div className="space-y-6">
+                          <div className="flex justify-between items-center border-b border-outline-variant/15 pb-4">
+                            <h3 className="font-black text-xl uppercase tracking-tighter">
+                              Videos
+                            </h3>
                             <button
-                              type="submit"
-                              disabled={createVideoMutation.isPending}
-                              className="w-full bg-black text-white p-1 text-sm rounded"
+                              className="material-symbols-outlined text-primary-fixed"
+                              onClick={() =>
+                                setActiveVideoCourseId(
+                                  activeVideoCourseId === course.$id
+                                    ? null
+                                    : course.$id,
+                                )
+                              }
                             >
-                              {createVideoMutation.isPending
-                                ? "Guardando..."
-                                : "Guardar"}
+                              <IoIosAdd />
                             </button>
-                          </form>
-                        )}
+                          </div>
+                          {/* Acordeón: Formulario Inline para Videos */}
+                          {activeVideoCourseId === course.$id && (
+                            <form
+                              onSubmit={(e) => handleCreateVideo(e, course.$id)}
+                              className="space-y-2 mb-4 bg-white p-2 rounded"
+                            >
+                              <input
+                                type="text"
+                                placeholder="Nombre del video"
+                                value={videoName}
+                                onChange={(e) => setVideoName(e.target.value)}
+                                className="w-full p-1 text-sm border rounded"
+                                required
+                              />
+                              <input
+                                type="text"
+                                placeholder="Código de YouTube"
+                                value={youtubeCode}
+                                onChange={(e) => setYoutubeCode(e.target.value)}
+                                className="w-full p-1 text-sm border rounded"
+                                required
+                              />
+                              <button
+                                type="submit"
+                                disabled={createVideoMutation.isPending}
+                                className="w-full bg-black text-white p-1 text-sm rounded"
+                              >
+                                {createVideoMutation.isPending
+                                  ? "Guardando..."
+                                  : "Guardar"}
+                              </button>
+                            </form>
+                          )}
 
-                        <ul className="space-y-2">
-                          {courseVideos.map((video) =>
+                          <ul className="space-y-2">
+                            {courseVideos.map((video) =>
                               editingVideoId === video.$id ? (
                                 <li
                                   key={video.$id}
@@ -504,7 +440,11 @@ const AdminPanelContent = () => {
                                     <button
                                       className="material-symbols-outlined text-sm text-on-surface-variant hover:text-error transition-colors"
                                       onClick={() => {
-                                        if (window.confirm("¿Estás seguro de que deseas eliminar este video?")) {
+                                        if (
+                                          window.confirm(
+                                            "¿Estás seguro de que deseas eliminar este video?",
+                                          )
+                                        ) {
                                           deleteVideoMutation.mutate(video.$id);
                                         }
                                       }}
@@ -516,64 +456,64 @@ const AdminPanelContent = () => {
                                 </li>
                               ),
                             )}
-                        </ul>
-                      </div>
-
-                      <div className="space-y-6">
-                        <div className="flex justify-between items-center border-b border-outline-variant/15 pb-4">
-                          <h3 className="font-black text-xl uppercase tracking-tighter">
-                            Archivos
-                          </h3>
-                          <button
-                            className="material-symbols-outlined text-primary-fixed hover:text-primary transition-colors"
-                            onClick={() =>
-                              setActiveFileCourseId(
-                                activeFileCourseId === course.$id
-                                  ? null
-                                  : course.$id,
-                              )
-                            }
-                          >
-                            <MdOutlineUploadFile />
-                          </button>
+                          </ul>
                         </div>
 
-                        {/* Acordeón: Formulario Inline para Archivos */}
-                        {activeFileCourseId === course.$id && (
-                          <form
-                            onSubmit={(e) => handleCreateFile(e, course.$id)}
-                            className="space-y-2 mb-4 bg-white p-2 rounded border border-outline-variant/30"
-                          >
-                            <input
-                              type="text"
-                              placeholder="Nombre del archivo"
-                              value={fileName}
-                              onChange={(e) => setFileName(e.target.value)}
-                              className="w-full p-2 text-sm text-on-surface bg-transparent border-b border-primary focus:outline-none"
-                              required
-                            />
-                            <input
-                              type="text"
-                              placeholder="URL del archivo"
-                              value={fileRoute}
-                              onChange={(e) => setFileRoute(e.target.value)}
-                              className="w-full p-2 text-sm text-on-surface bg-transparent border-b border-primary focus:outline-none"
-                              required
-                            />
+                        <div className="space-y-6">
+                          <div className="flex justify-between items-center border-b border-outline-variant/15 pb-4">
+                            <h3 className="font-black text-xl uppercase tracking-tighter">
+                              Archivos
+                            </h3>
                             <button
-                              type="submit"
-                              disabled={createFileMutation.isPending}
-                              className="w-full mt-2 bg-primary hover:bg-primary/90 text-white p-2 text-xs font-bold uppercase tracking-wider rounded transition-colors"
+                              className="material-symbols-outlined text-primary-fixed hover:text-primary transition-colors"
+                              onClick={() =>
+                                setActiveFileCourseId(
+                                  activeFileCourseId === course.$id
+                                    ? null
+                                    : course.$id,
+                                )
+                              }
                             >
-                              {createFileMutation.isPending
-                                ? "Guardando..."
-                                : "Guardar"}
+                              <MdOutlineUploadFile />
                             </button>
-                          </form>
-                        )}
+                          </div>
 
-                        <div className="flex flex-wrap gap-3">
-                          {courseFiles.map((file) =>
+                          {/* Acordeón: Formulario Inline para Archivos */}
+                          {activeFileCourseId === course.$id && (
+                            <form
+                              onSubmit={(e) => handleCreateFile(e, course.$id)}
+                              className="space-y-2 mb-4 bg-white p-2 rounded border border-outline-variant/30"
+                            >
+                              <input
+                                type="text"
+                                placeholder="Nombre del archivo"
+                                value={fileName}
+                                onChange={(e) => setFileName(e.target.value)}
+                                className="w-full p-2 text-sm text-on-surface bg-transparent border-b border-primary focus:outline-none"
+                                required
+                              />
+                              <input
+                                type="text"
+                                placeholder="URL del archivo"
+                                value={fileRoute}
+                                onChange={(e) => setFileRoute(e.target.value)}
+                                className="w-full p-2 text-sm text-on-surface bg-transparent border-b border-primary focus:outline-none"
+                                required
+                              />
+                              <button
+                                type="submit"
+                                disabled={createFileMutation.isPending}
+                                className="w-full mt-2 bg-primary hover:bg-primary/90 text-white p-2 text-xs font-bold uppercase tracking-wider rounded transition-colors"
+                              >
+                                {createFileMutation.isPending
+                                  ? "Guardando..."
+                                  : "Guardar"}
+                              </button>
+                            </form>
+                          )}
+
+                          <div className="flex flex-wrap gap-3">
+                            {courseFiles.map((file) =>
                               editingFileId === file.$id ? (
                                 <div
                                   key={file.$id}
@@ -645,7 +585,11 @@ const AdminPanelContent = () => {
                                     <button
                                       className="w-6 h-6 rounded-full hover:bg-error/10 flex items-center justify-center text-error transition-colors"
                                       onClick={() => {
-                                        if (window.confirm("¿Estás seguro de que deseas eliminar este archivo?")) {
+                                        if (
+                                          window.confirm(
+                                            "¿Estás seguro de que deseas eliminar este archivo?",
+                                          )
+                                        ) {
                                           deleteFileMutation.mutate(file.$id);
                                         }
                                       }}
@@ -659,13 +603,13 @@ const AdminPanelContent = () => {
                                 </div>
                               ),
                             )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              );
-            })}
+                    </CollapsibleContent>
+                  </Collapsible>
+                );
+              })}
             </div>
           </main>
         </SidebarInset>
@@ -722,7 +666,13 @@ const AdminPanelContent = () => {
 
 const LoginPage = () => {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-100">Cargando Panel...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+          Cargando Panel...
+        </div>
+      }
+    >
       <AdminPanelContent />
     </Suspense>
   );
