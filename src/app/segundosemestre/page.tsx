@@ -1,69 +1,18 @@
 "use client";
 import TitleCourse from "@/components/TitleCourse";
-import { SegundoSemestreCursos, SemesterRoutes } from "@/utils/data/routes";
-import React, { useState } from "react";
-import AppSidebar from "@/components/Sidebar";
-import { useRouter } from "next/navigation";
-import { SidebarInset, SidebarTrigger } from "@/context/components/ui/sidebar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/context/components/ui/breadcrumb";
+import { SegundoSemestreCursos } from "@/utils/data/routes";
+import AppLayout from "@/components/AppLayout";
 import { MdArrowOutward } from "react-icons/md";
+import Link from "next/link";
 
 const SegundoSemestre = () => {
-  const router = useRouter();
-
-  const staticTopics = SemesterRoutes.map((route) => ({
-    $id: route.id.toString(),
-    semester: route.name,
-  }));
-
-  const [activeTopicId, setActiveTopicId] = useState<string | null>("1");
-
-  const handleTopicSelect = (id: string) => {
-    setActiveTopicId(id);
-    const topic = SemesterRoutes.find((r) => r.id.toString() === id);
-    if (topic) {
-      router.push(topic.mainroute);
-    }
-  };
-
   return (
-    <>
-      <AppSidebar
-        topics={staticTopics}
-        activeTopicId={activeTopicId}
-        onTopicSelect={handleTopicSelect}
-        isAdmin={false}
-      />
-      <SidebarInset>
-        <header className="sticky top-0 w-full z-30 bg-neutral-50/80 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-outline-variant/15">
-          <div className="flex items-center px-4 md:px-8 h-20 w-full max-w-screen-2xl mx-auto gap-2 md:gap-4 text-xl md:text-2xl font-black tracking-tighter text-neutral-900 dark:text-neutral-50 uppercase">
-            <SidebarTrigger />
-            <span>Segundo Semestre</span>
-          </div>
-        </header>
-
-        <main className="flex-1 px-4 md:px-8 py-8 md:py-12 max-w-screen-xl w-full mx-auto">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Inicio</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Segundo Semestre</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </main>
-        <section className="min-h-screen flex flex-col items-center gap-2 p-4 ">
-          <main className=" px-8 pb-16">
+    <AppLayout
+      title="Segundo Semestre"
+      activeTopicId="2"
+    >
+      <section className="min-h-screen flex flex-col items-center gap-2 p-4">
+        <main className="px-8 pb-16">
             <div className="max-w-7xl mx-auto">
               <header className="mb-16">
                 <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
@@ -79,7 +28,8 @@ const SegundoSemestre = () => {
                   // Diseño principal para el primer curso
                   if (index === 0) {
                     return (
-                      <div
+                      <Link
+                        href={cursos.href}
                         className="md:col-span-8 group bg-surface-container-low rounded-xl p-1 relative overflow-hidden transition-all duration-300 hover:bg-surface-dim"
                         key={cursos.id}
                       >
@@ -90,27 +40,22 @@ const SegundoSemestre = () => {
                                 {cursos.icon ? <cursos.icon /> : "menu_book"}
                               </span>
                             </div>
-                            <span className="bg-secondary-container text-on-secondary-container text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-                              Destacado
-                            </span>
                           </div>
                           <div>
-                            <p className="text-zinc-400 text-sm font-medium mb-2">
-                              Principal
-                            </p>
                             <h2 className="text-5xl font-black tracking-tighter text-black mb-6">
                               {cursos.name}
                             </h2>
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     );
                   }
 
                   // Diseño secundario para el segundo curso
                   if (index === 1) {
                     return (
-                      <div
+                      <Link
+                        href={cursos.href}
                         className="md:col-span-4 bg-surface-container-low rounded-xl p-1 transition-all duration-300 hover:bg-surface-dim"
                         key={cursos.id}
                       >
@@ -129,7 +74,7 @@ const SegundoSemestre = () => {
                             </p>
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     );
                   }
 
@@ -144,7 +89,8 @@ const SegundoSemestre = () => {
                   const iconName = defaultIcons[index] || "folder";
 
                   return (
-                    <div
+                    <Link
+                      href={cursos.href}
                       className="md:col-span-4 bg-surface-container-low rounded-xl p-1 transition-all duration-300 hover:bg-surface-dim"
                       key={cursos.id}
                     >
@@ -163,15 +109,14 @@ const SegundoSemestre = () => {
                           </h2>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
             </div>
-          </main>
-        </section>
-      </SidebarInset>
-    </>
+        </main>
+      </section>
+    </AppLayout>
   );
 };
 
