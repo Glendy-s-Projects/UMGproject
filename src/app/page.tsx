@@ -1,68 +1,14 @@
 "use client";
-import { useState } from "react";
-import Cards from "@/components/Cards";
+import { useRouter } from "next/navigation";
+import AppLayout from "@/components/AppLayout";
 import { SemesterRoutes } from "@/utils/data/routes";
-import AppSidebar from "@/components/Sidebar";
-import { SidebarInset, SidebarTrigger } from "@/context/components/ui/sidebar";
 import { MdArrowOutward } from "react-icons/md";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/context/components/ui/breadcrumb";
 
 export default function Home() {
-  const router = useRouter();
-
-  // Convertimos las rutas estáticas al formato que espera el Sidebar
-  const staticTopics = SemesterRoutes.map((route) => ({
-    $id: route.id.toString(),
-    semester: route.name,
-  }));
-
-  const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
-
-  const handleTopicSelect = (id: string) => {
-    setActiveTopicId(id);
-    const topic = SemesterRoutes.find((r) => r.id.toString() === id);
-    if (topic) {
-      router.push(topic.mainroute);
-    }
-  };
-
   return (
-    <>
-      <AppSidebar
-        topics={staticTopics}
-        activeTopicId={activeTopicId}
-        onTopicSelect={handleTopicSelect}
-        isAdmin={false}
-      />
-
-      <SidebarInset className="flex flex-col flex-1 w-full bg-background transition-all duration-200 ease-linear">
-        <header className="sticky top-0 w-full z-30 bg-neutral-50/80 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-outline-variant/15">
-          <div className="flex items-center px-4 md:px-8 h-20 w-full max-w-screen-2xl mx-auto gap-2 md:gap-4 text-xl md:text-2xl font-black tracking-tighter text-neutral-900 dark:text-neutral-50 uppercase">
-            <SidebarTrigger />
-            <span>Ingenieria en Sistemas</span>
-          </div>
-        </header>
-
-        <main className="flex-1 px-4 md:px-8 py-8 md:py-12 max-w-screen-xl w-full mx-auto">
-          <div className="mb-8">
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/">Inicio</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
+    <AppLayout title="Ingenieria en Sistemas">
+      <main className="flex-1 px-4 md:px-8 py-8 md:py-12 max-w-screen-xl w-full mx-auto">
           <section className="mb-20">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               <div className="lg:col-span-8">
@@ -116,8 +62,7 @@ export default function Home() {
               </Link>
             ))}
           </section>
-        </main>
-      </SidebarInset>
-    </>
+      </main>
+    </AppLayout>
   );
 }

@@ -1,15 +1,23 @@
 "use client";
 
-import SubTitleCards from "@/components/SubTitleCards";
-import TitleCourse from "@/components/TitleCourse";
+import AppLayout from "@/components/AppLayout";
+import MainSemesterLayout from "@/components/MainSemesterLayout";
+import useCourseData from "@/hooks/useCourseData";
 import { AlgebraLinealSlugs } from "@/utils/data/routes";
 
 const Algebralineal = () => {
+  const { videos, files, loading } = useCourseData("Algebra Lineal");
+
   return (
-    <div className="min-h-screen p-4 w-full flex flex-col gap-2 bg-gray-100">
-      <TitleCourse course="Álgebra Lineal" />
-      <SubTitleCards slugLinks={AlgebraLinealSlugs} bgColor="bg-green-300" />
-    </div>
+    <AppLayout title="Álgebra Lineal" activeTopicId="5">
+      <MainSemesterLayout
+        title="Álgebra Lineal"
+        slugs={AlgebraLinealSlugs}
+        videos={videos}
+        files={files}
+        loading={loading}
+      />
+    </AppLayout>
   );
 };
 

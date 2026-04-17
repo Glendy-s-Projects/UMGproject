@@ -1,15 +1,21 @@
 "use client";
-import SubTitleCards from "@/components/SubTitleCards";
-import TitleCourse from "@/components/TitleCourse";
+import AppLayout from "@/components/AppLayout";
+import MainSemesterLayout from "@/components/MainSemesterLayout";
+import useCourseData from "@/hooks/useCourseData";
 import { ContabilidadSlugs } from "@/utils/data/routes";
 
-
 const Contabilidad = () => {
+  const { videos, files, loading } = useCourseData("Contabilidad II");
   return (
-    <section className="flex flex-col gap-2  min-h-screen bg-gray-100 p-4">
-      <TitleCourse course="Contabilidad II" />
-      <SubTitleCards slugLinks={ContabilidadSlugs} bgColor="bg-green-100" />
-    </section>
+    <AppLayout title="Contabilidad" activeTopicId="6">
+      <MainSemesterLayout
+        title="Contabilidad  II"
+        slugs={ContabilidadSlugs}
+        videos={videos}
+        files={files}
+        loading={loading}
+      />
+    </AppLayout>
   );
 };
 

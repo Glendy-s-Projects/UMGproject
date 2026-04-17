@@ -1,15 +1,22 @@
-"use client"
-import SubTitleCards from "@/components/SubTitleCards";
-import TitleCourse from "@/components/TitleCourse";
+"use client";
+import AppLayout from "@/components/AppLayout";
+import MainSemesterLayout from "@/components/MainSemesterLayout";
+import useCourseData from "@/hooks/useCourseData";
 import { DerechoInformaticoSlugs } from "@/utils/data/routes";
 import React from "react";
 
 const DerechoInformatico = () => {
+  const { videos, files, loading } = useCourseData("Derecho Informatico");
   return (
-    <div className="min-h-screen p-4 w-full flex flex-col gap-2 bg-gray-100">
-      <TitleCourse course="Derecho Informatico" />
-       <SubTitleCards slugLinks={DerechoInformaticoSlugs} bgColor="bg-green-300" /> 
-    </div>
+    <AppLayout title="Derecho Informatico" activeTopicId="6">
+      <MainSemesterLayout
+        title="Derecho Informatico"
+        slugs={DerechoInformaticoSlugs}
+        videos={videos}
+        files={files}
+        loading={loading}
+      />
+    </AppLayout>
   );
 };
 
