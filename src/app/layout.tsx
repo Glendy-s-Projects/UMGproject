@@ -10,7 +10,6 @@ import { cn } from "@/context/lib/utils";
 import { TooltipProvider } from "@/context/components/ui/tooltip";
 import {
   SidebarProvider,
-  SidebarTrigger,
 } from "@/context/components/ui/sidebar";
 import { ToastContainer } from "react-toastify";
 

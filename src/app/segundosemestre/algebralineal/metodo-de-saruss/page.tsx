@@ -3,6 +3,7 @@ import { BlockMath, InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import useAlgebra from "@/hooks/useAlgebra";
 import TitleCourse from "@/components/TitleCourse";
+import AppLayout from "@/components/AppLayout";
 
 const SarrusCalculator = () => {
   const {
@@ -21,12 +22,13 @@ const SarrusCalculator = () => {
   } = useAlgebra();
 
   return (
-    <div className="p-6 min-h-screen flex flex-col gap-2 items-center bg-gray-100">
+     <AppLayout title="Segundo Semestre" activeTopicId="2">
+    <div className="p-6 min-h-screen flex flex-col gap-2 items-center bg-background text-foreground">
       <TitleCourse course="Método de Sarrus" />
       <div className="w-full flex flex-wrap justify-center gap-2">
         {/* INPUT MATRIZ */}
-        <div className=" bg-white p-6 rounded-lg shadow-lg w-auto max-sm:w-full flex flex-col items-center justify-center">
-          <h3 className="text-lg font-semibold text-center mb-4 text-gray-700">
+        <div className="bg-surface-container-lowest border border-outline-variant p-6 rounded-xl shadow-sm w-auto max-sm:w-full flex flex-col items-center justify-center">
+          <h3 className="text-lg font-semibold text-center mb-4 text-on-surface">
             Ingrese los valores de la matriz 3x3
           </h3>
           <div className="grid grid-cols-3 gap-3">
@@ -37,17 +39,17 @@ const SarrusCalculator = () => {
                   type="number"
                   value={val}
                   onChange={(e) => handleChange2(i, j, e.target.value)}
-                  className="w-20 h-14 text-center border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg font-semibold transition-colors"
+                  className="w-20 h-14 text-center border border-outline-variant bg-surface-container-lowest text-on-surface rounded-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-lg font-semibold transition-colors"
                 />
               ))
             )}
           </div>
         </div>
 
-        <div className=" bg-white w-auto max-sm:w-full">
+        <div className="w-auto max-sm:w-full">
           {/* MATRIZ EXTENDIDA CON FLECHAS */}
-          <div className="bg-white p-6 rounded-lg shadow-lg flex-1">
-            <h2 className="text-xl font-semibold text-center mb-4 text-gray-700">
+          <div className="bg-surface-container-lowest border border-outline-variant p-6 rounded-xl shadow-sm flex-1">
+            <h2 className="text-xl font-semibold text-center mb-4 text-on-surface">
               Extensión de Sarrus
             </h2>
             <div className="flex justify-center">
@@ -62,7 +64,7 @@ const SarrusCalculator = () => {
                   }}
                 >
                   {extended.flat().map((val, k) => (
-                    <div key={k} className="text-gray-700 font-semibold">
+                    <div key={k} className="text-on-surface font-semibold">
                       {val}
                     </div>
                   ))}
@@ -133,19 +135,19 @@ const SarrusCalculator = () => {
         </div>
 
         {/* RESULTADO */}
-        <div className="mt-8 p-8 rounded-lg shadow-lg w-auto max-sm:w-full bg-white">
-          <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">
+        <div className="mt-8 p-8 rounded-xl shadow-sm border border-outline-variant w-auto max-sm:w-full bg-surface-container-lowest">
+          <h2 className="text-2xl font-semibold text-center mb-6 text-foreground">
             Cálculo del Determinante
           </h2>
           <div className="text-center max-sm:text-xs">
             <BlockMath math={expr} />
           </div>
           <div className="mt-6 flex flex-wrap gap-2 text-sm items-center justify-center">
-            <div className="bg-red-50 p-4 rounded-lg">
-              <h3 className="font-extrabold text-red-800 mb-2 flex items-center">
+            <div className="bg-surface-container-low border-l-4 border-destructive p-4 rounded-lg shadow-sm">
+              <h3 className="font-extrabold text-on-surface mb-2 flex items-center">
                 Diagonales Principales
               </h3>
-              <div className="space-y-1 text-red-700">
+              <div className="space-y-1 text-muted-foreground">
                 {redLines.map((r, k) => (
                   <div key={k}>
                     <InlineMath
@@ -157,11 +159,11 @@ const SarrusCalculator = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="font-extrabold text-blue-800 mb-2 flex items-center ">
+            <div className="bg-surface-container-low border-l-4 border-primary p-4 rounded-lg shadow-sm">
+              <h3 className="font-extrabold text-on-surface mb-2 flex items-center ">
                 Diagonales Secundarias
               </h3>
-              <div className="space-y-1 text-blue-700">
+              <div className="space-y-1 text-muted-foreground">
                 {blueLines.map((b, k) => (
                   <div key={k}>
                     <InlineMath
@@ -176,7 +178,7 @@ const SarrusCalculator = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div></AppLayout>
   );
 };
 

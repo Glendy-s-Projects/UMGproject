@@ -22,10 +22,17 @@ type AppLayoutProps = {
   children: React.ReactNode;
 };
 
-const AppLayout = ({ title, breadcrumbs, activeTopicId: initialActiveId = null, children }: AppLayoutProps) => {
+const AppLayout = ({
+ // title,
+  breadcrumbs,
+  activeTopicId: initialActiveId = null,
+  children,
+}: AppLayoutProps) => {
   const router = useRouter();
   const pathname = usePathname();
-  const [activeTopicId, setActiveTopicId] = useState<string | null>(initialActiveId);
+  const [activeTopicId, setActiveTopicId] = useState<string | null>(
+    initialActiveId,
+  );
 
   const staticTopics = SemesterRoutes.map((route) => ({
     $id: route.id.toString(),
@@ -42,15 +49,15 @@ const AppLayout = ({ title, breadcrumbs, activeTopicId: initialActiveId = null, 
   const autoBreadcrumbs = useMemo(() => {
     if (breadcrumbs) return breadcrumbs;
 
-    const segments = pathname.split('/').filter(Boolean);
-    const crumbs: BreadcrumbEntry[] = [{ label: 'Inicio', href: '/' }];
+    const segments = pathname.split("/").filter(Boolean);
+    const crumbs: BreadcrumbEntry[] = [{ label: "Inicio", href: "/" }];
 
-    let currentPath = '';
+    let currentPath = "";
     segments.forEach((segment) => {
       currentPath += `/${segment}`;
-      
+
       // Buscar en SemesterRoutes
-      const semester = SemesterRoutes.find(s => s.mainroute === currentPath);
+      const semester = SemesterRoutes.find((s) => s.mainroute === currentPath);
       if (semester) {
         crumbs.push({ label: semester.name, href: currentPath });
         return;
@@ -58,7 +65,7 @@ const AppLayout = ({ title, breadcrumbs, activeTopicId: initialActiveId = null, 
 
       // Buscar en cursos de cada semestre
       for (const semester of SemesterRoutes) {
-        const course = semester.routes.find(r => r.href === currentPath);
+        const course = semester.routes.find((r) => r.href === currentPath);
         if (course) {
           crumbs.push({ label: course.name, href: currentPath });
           return;
@@ -66,7 +73,9 @@ const AppLayout = ({ title, breadcrumbs, activeTopicId: initialActiveId = null, 
 
         // Buscar en subrutas de cada curso
         for (const course of semester.routes) {
-          const subroute = course.subroutes?.find(sr => sr.href === currentPath);
+          const subroute = course.subroutes?.find(
+            (sr) => sr.href === currentPath,
+          );
           if (subroute) {
             crumbs.push({ label: subroute.name, href: currentPath });
             return;
@@ -76,9 +85,9 @@ const AppLayout = ({ title, breadcrumbs, activeTopicId: initialActiveId = null, 
 
       // Si no se encuentra, usar el segmento formateado
       const formatted = segment
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
       crumbs.push({ label: formatted, href: currentPath });
     });
 
@@ -94,34 +103,32 @@ const AppLayout = ({ title, breadcrumbs, activeTopicId: initialActiveId = null, 
         isAdmin={false}
       />
       <SidebarInset className="flex flex-col flex-1 w-full bg-background transition-all duration-200 ease-linear">
-        <header className="sticky top-0 w-full z-30 bg-neutral-50/80 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-outline-variant/15">
-          <div className="flex items-center px-4 md:px-8 h-20 w-full max-w-screen-2xl mx-auto gap-2 md:gap-4 text-xl md:text-2xl font-black tracking-tighter text-neutral-900 dark:text-neutral-50 uppercase">
+        <header className="sticky top-0 w-full z-30 bg-neutral-100 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-outline-variant/15">
+          <div className="flex items-center px-4 md:px-4 h-16 w-full max-w-screen-2xl mx-auto gap-2 md:gap-4 text-xl md:text-2xl font-black tracking-tighter text-neutral-900 dark:text-neutral-50 uppercase">
             <SidebarTrigger />
-            <span>{title}</span>
+            <Breadcrumb>
+              <BreadcrumbList>
+                {autoBreadcrumbs.map((crumb, i) => {
+                  const isLast = i === autoBreadcrumbs.length - 1;
+                  return (
+                    <Fragment key={i}>
+                      <BreadcrumbItem>
+                        {isLast ? (
+                          <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                        ) : (
+                          <BreadcrumbLink href={crumb.href}>
+                            {crumb.label}
+                          </BreadcrumbLink>
+                        )}
+                      </BreadcrumbItem>
+                      {!isLast && <BreadcrumbSeparator />}
+                    </Fragment>
+                  );
+                })}
+              </BreadcrumbList>
+            </Breadcrumb>
           </div>
         </header>
-
-        <div className="px-4 md:px-8 py-6 max-w-screen-xl w-full mx-auto">
-          <Breadcrumb>
-            <BreadcrumbList>
-              {autoBreadcrumbs.map((crumb, i) => {
-                const isLast = i === autoBreadcrumbs.length - 1;
-                return (
-                  <Fragment key={i}>
-                    <BreadcrumbItem>
-                      {isLast ? (
-                        <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                      ) : (
-                        <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
-                      )}
-                    </BreadcrumbItem>
-                    {!isLast && <BreadcrumbSeparator />}
-                  </Fragment>
-                );
-              })}
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
 
         {children}
       </SidebarInset>

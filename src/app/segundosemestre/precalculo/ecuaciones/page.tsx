@@ -4,36 +4,41 @@ import usePrecalculo from "@/hooks/usePrecalculo";
 import BotonUtil from "@/utils/BotonUtil";
 import "katex/dist/katex.min.css";
 import { InlineMath } from "react-katex";
+import AppLayout from "@/components/AppLayout";
 
 const EquationSolverImagenStyle: React.FC = () => {
   const { equation, setEquation, steps, solve } = usePrecalculo();
 
   return (
-    <div className="min-h-screen px-4 py-2 bg-gray-100 flex flex-col gap-2">
-      <TitleCourse course="Ecuaciones" />
-      <div className="flex flex-wrap gap-2 items-center justify-center w-full">
-        <form className="flex flex-wrap items-end justify-center gap-2 w-full">
-          <div className="flex flex-col">
-            <label className="text-xs font-semibold">Ecuación</label>
-            <input
-              type="text"
-              value={equation}
-              onChange={(e) => setEquation(e.target.value)}
-              className="border p-2 rounded-xl w-auto"
-              placeholder="Ej.: x^4-8x^2+2=0 o 2x^2+3x-1=0"
-            />
-          </div>
-          <InlineMath math={equation} />
-        </form>
-        <BotonUtil
-          label="Resolver"
-          onClick={solve}
-          className="px-4 py-2 bg-purple-600 text-white rounded-xl shadow"
-        />
-      </div>
+    <AppLayout title="Segundo Semestre" activeTopicId="2">
+      <div className="min-h-screen px-4 py-2 bg-background flex flex-col gap-2">
+        <TitleCourse course="Ecuaciones" />
+        <div className="flex flex-wrap gap-2 items-center justify-center w-full">
+          <form className="flex flex-wrap items-end justify-center gap-2 w-full">
+            <div className="flex flex-col">
+              <label className="text-xs font-semibold text-on-surface-variant mb-1">
+                Ecuación
+              </label>
+              <input
+                type="text"
+                value={equation}
+                onChange={(e) => setEquation(e.target.value)}
+                className="border border-outline-variant bg-surface-container-lowest text-on-surface p-2 rounded-xl w-auto focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                placeholder="Ej.: x^4-8x^2+2=0 o 2x^2+3x-1=0"
+              />
+            </div>
+            <InlineMath math={equation} />
+          </form>
+          <BotonUtil
+            label="Resolver"
+            onClick={solve}
+            className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded-xl shadow"
+          />
+        </div>
 
-      <div className="flex flex-col gap-3 items-center ">{steps}</div>
-    </div>
+        <div className="flex flex-col gap-3 items-center ">{steps}</div>
+      </div>
+    </AppLayout>
   );
 };
 
