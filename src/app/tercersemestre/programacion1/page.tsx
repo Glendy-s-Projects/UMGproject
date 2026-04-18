@@ -9,7 +9,7 @@ import React from "react";
 const Programacion1 = () => {
   const { videos, files, loading } = useCourseData("Programación 1");
   return (
-    <AppLayout title="Programación 1" activeTopicId="1">
+    <AppLayout title="Programación 1" activeTopicId="3">
       <MainSemesterLayout
         title="Programación 1"
         slugs={Programacion1Slugs}

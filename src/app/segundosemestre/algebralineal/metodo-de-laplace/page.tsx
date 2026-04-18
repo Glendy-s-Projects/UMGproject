@@ -2,6 +2,7 @@
 import useAlgebra from "@/hooks/useAlgebra";
 import { MinorStep } from "@/types/index";
 import TitleCourse from "@/components/TitleCourse";
+import AppLayout from "@/components/AppLayout";
 
 export default function Laplace3x3() {
   const {
@@ -19,10 +20,11 @@ export default function Laplace3x3() {
   } = useAlgebra();
 
   return (
-    <div className="min-h-screen flex flex-col gap-2 items-center w-full p-4 bg-gray-100">
+     <AppLayout title="Segundo Semestre" activeTopicId="2">
+    <div className="min-h-screen flex flex-col gap-2 items-center w-full p-4 bg-background text-foreground">
       <TitleCourse course="Determinante por LAPLACE" />
       <div className="flex flex-wrap items-center justify-center gap-10">
-        <div className="flex flex-col items-center justify-between h-full  p-2 shadow-xl rounded-2xl ">
+        <div className="flex flex-col items-center justify-between h-full p-4 shadow-sm border border-outline-variant bg-surface-container-lowest rounded-2xl">
           <h2 className="text-xl text-center font-bold ">
             {mode === "col" ? "columna" : "fila"} {index + 1}
           </h2>
@@ -39,14 +41,14 @@ export default function Laplace3x3() {
                   type="number"
                   value={val}
                   onChange={(e) => handleChange4(e, i, j)}
-                  className="border p-2 w-16 text-center"
+                  className="border border-outline-variant bg-surface-container-lowest text-on-surface p-2 w-16 text-center rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                 />
               ))
             )}
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-between h-full p-2 shadow-xl rounded-2xl">
+        <div className="flex flex-col items-center justify-between h-full p-4 shadow-sm border border-outline-variant bg-surface-container-lowest rounded-2xl">
           <h3 className="text-lg font-semibold">Matriz de signos:</h3>
           <div
             className={`grid ${
@@ -57,7 +59,7 @@ export default function Laplace3x3() {
               row.map((val, j) => (
                 <div
                   key={`${i}-${j}`}
-                  className="border p-2 w-16 text-center font-bold"
+                  className="border border-outline-variant bg-surface-container-low text-on-surface p-2 w-16 text-center font-bold rounded-md"
                 >
                   {val}
                 </div>
@@ -67,7 +69,7 @@ export default function Laplace3x3() {
         </div>
 
         <div className="flex flex-col items-center justify-center gap-6 ">
-          <div className=" flex items-center gap-4  shadow-xl rounded-xl p-2">
+        <div className="flex items-center gap-4 shadow-sm border border-outline-variant bg-surface-container-lowest rounded-xl p-4">
             <label className="font-semibold">Expandir por:</label>
             <select
               value={mode}
@@ -75,7 +77,7 @@ export default function Laplace3x3() {
                 setMode(e.target.value);
                 setIndex(0);
               }}
-              className="border p-2 rounded-md"
+            className="border border-outline-variant bg-surface-container-lowest text-on-surface p-2 rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
             >
               <option value="col">Columna</option>
               <option value="row">Fila</option>
@@ -85,7 +87,7 @@ export default function Laplace3x3() {
             <select
               value={index}
               onChange={(e) => setIndex(parseInt(e.target.value))}
-              className="border p-2 rounded-md"
+            className="border border-outline-variant bg-surface-container-lowest text-on-surface p-2 rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
             >
               {Array(size4)
                 .fill(0)
@@ -96,12 +98,12 @@ export default function Laplace3x3() {
                 ))}
             </select>
           </div>
-          <div className=" shadow-xl rounded-xl  p-2">
+        <div className="shadow-sm border border-outline-variant bg-surface-container-lowest rounded-xl p-4">
             <label className="font-semibold mr-2">Tamaño:</label>
             <select
               value={size4}
               onChange={(e) => handleSizeChange4(parseInt(e.target.value))}
-              className="border rounded-md p-2"
+            className="border border-outline-variant bg-surface-container-lowest text-on-surface p-2 rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
             >
               <option value={3}>3x3</option>
               <option value={4}>4x4</option>
@@ -119,11 +121,11 @@ export default function Laplace3x3() {
             {steps2.map((s, idx) => (
               <div
                 key={idx}
-                className={` p-4 flex rounded bg-gray-100 shadow-xl  ${
+            className={`p-4 flex rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm ${
                   s.minor.length === 2 ? "flex-row " : "flex-col"
                 }`}
               >
-                <div className="flex justify-center items-center gap-2  ">
+            <div className="flex justify-center items-center gap-2">
                   <span>
                     {s.sign > 0 ? "+" : "-"}({s.element})
                   </span>
@@ -131,7 +133,7 @@ export default function Laplace3x3() {
                   <div
                     className={`inline-grid ${
                       s.minor.length === 2 ? "grid-cols-2" : "grid-cols-3"
-                    } gap-1 border-l-2 border-r-2 p-1`}
+                } gap-1 border-l border-r border-outline-variant px-2 py-1`}
                   >
                     {s.minor.map((row, i) =>
                       row.map((val, j) => (
@@ -145,7 +147,7 @@ export default function Laplace3x3() {
                     )}
                   </div>
                 </div>
-                <div className="text-sm text-gray-700 ml-4">
+            <div className="text-sm text-muted-foreground ml-4">
                   {s.minor.length === 2 ? (
                     <>
                       <div>Cálculo del determinante 2x2:</div>
@@ -168,7 +170,7 @@ export default function Laplace3x3() {
                         s.minorSteps.map((step: MinorStep, stepIdx: number) => (
                           <div
                             key={stepIdx}
-                            className=" rounded flex flex-col w-full gap-2 border p-2"
+                        className="rounded-lg flex flex-col w-full gap-2 border border-outline-variant bg-surface-container-low p-2"
                           >
                             <div className="flex  gap-2 items-center justify-center   ">
                               <span>
@@ -180,7 +182,7 @@ export default function Laplace3x3() {
                                   s.minor.length === 2
                                     ? "grid-cols-2"
                                     : "grid-cols-2"
-                                } gap-1 border-l-2 border-r-2 p-1`}
+                            } gap-1 border-l border-r border-outline-variant px-2 py-1`}
                               >
                                 {step.minor.map((row: number[], i: number) =>
                                   row.map((val: number, j: number) => (
@@ -201,13 +203,13 @@ export default function Laplace3x3() {
                             <div className="text-xs mt-1 ">
                               = {step.sign > 0 ? "+" : "-"} ({step.element}) × (
                               {step.minorValue}) ={" "}
-                              <span className="text-blue-600 font-extrabold">
+                          <span className="text-primary font-extrabold">
                                 {step.term}
                               </span>
                             </div>
                           </div>
                         ))}
-                      <div className="mt-2 font-semibold text-blue-600">
+                  <div className="mt-2 font-semibold text-primary">
                         Suma total 3x3:{" "}
                         {Array.isArray(s.minorSteps)
                           ? s.minorSteps
@@ -221,7 +223,7 @@ export default function Laplace3x3() {
                   ) : (
                     <div>Determinante 3x3 = {s.minorValue}</div>
                   )}
-                  <div className=" font-semibold text-green-600 text-center">
+              <div className="font-semibold text-primary text-center mt-2">
                     Resultado: {s.sign > 0 ? "+" : "-"} ({s.element}) × (
                     {s.minorValue}) = {s.term}
                   </div>
@@ -231,7 +233,7 @@ export default function Laplace3x3() {
           </div>
         </div>
 
-        <div className="w-auto flex flex-col items-center justify-center mt-4 p-2 shadow-2xl rounded-xl ">
+        <div className="w-auto flex flex-col items-center justify-center mt-4 p-4 shadow-sm border border-outline-variant bg-surface-container-low rounded-xl">
           {size4 === 4 ? (
             <>
               <h3 className="text-lg font-extrabold">
@@ -253,6 +255,6 @@ export default function Laplace3x3() {
           )}
         </div>
       </div>
-    </div>
+    </div></AppLayout>
   );
 }

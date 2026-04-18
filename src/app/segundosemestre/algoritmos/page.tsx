@@ -7,7 +7,7 @@ import { AlgoritmoSlugs } from "@/utils/data/routes";
 const Algoritmos = () => {
   const { videos, files, loading } = useCourseData("Algoritmos");
   return (
-    <AppLayout title="Algoritmos" activeTopicId="3">
+    <AppLayout title="Algoritmos" activeTopicId="2">
       <MainSemesterLayout
         title="Algoritmos"
         slugs={AlgoritmoSlugs}

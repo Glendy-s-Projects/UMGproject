@@ -8,7 +8,7 @@ import React from "react";
 const Calculo1 = () => {
   const { videos, files, loading } = useCourseData("Cálculo 1");
   return (
-    <AppLayout title="Cálculo 1" activeTopicId="4">
+    <AppLayout title="Cálculo 1" activeTopicId="3">
       <MainSemesterLayout
         title="Cálculo 1"
         slugs={Calculo1Slugs}

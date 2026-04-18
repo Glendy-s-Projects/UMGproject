@@ -8,7 +8,7 @@ import React from "react";
 const DerechoInformatico = () => {
   const { videos, files, loading } = useCourseData("Derecho Informatico");
   return (
-    <AppLayout title="Derecho Informatico" activeTopicId="6">
+    <AppLayout title="Derecho Informatico" activeTopicId="3">
       <MainSemesterLayout
         title="Derecho Informatico"
         slugs={DerechoInformaticoSlugs}

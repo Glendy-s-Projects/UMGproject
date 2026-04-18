@@ -7,7 +7,7 @@ import { ContabilidadSlugs } from "@/utils/data/routes";
 const Contabilidad = () => {
   const { videos, files, loading } = useCourseData("Contabilidad II");
   return (
-    <AppLayout title="Contabilidad" activeTopicId="6">
+    <AppLayout title="Contabilidad" activeTopicId="2">
       <MainSemesterLayout
         title="Contabilidad  II"
         slugs={ContabilidadSlugs}

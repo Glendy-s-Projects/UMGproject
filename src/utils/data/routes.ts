@@ -293,5 +293,6 @@ export const Calculo1Slugs = getTemasByCursoId(3, 4); // Semestre 3, Curso 4
 export const DerechoInformaticoSlugs = getTemasByCursoId(3, 5); // Semestre 3, Curso 5
 
 // Cursos por semestre
+export const PrimerSemestreCursos = getCursosBySemestreId(1); // ID 2 = Segundo Semestre
 export const SegundoSemestreCursos = getCursosBySemestreId(2); // ID 2 = Segundo Semestre
 export const TercerSemestreCursos = getCursosBySemestreId(3); // ID 3 = Tercer Semestre

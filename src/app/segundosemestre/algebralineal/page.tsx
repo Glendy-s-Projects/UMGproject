@@ -9,7 +9,7 @@ const Algebralineal = () => {
   const { videos, files, loading } = useCourseData("Algebra Lineal");
 
   return (
-    <AppLayout title="Álgebra Lineal" activeTopicId="5">
+    <AppLayout title="Álgebra Lineal" activeTopicId="2">
       <MainSemesterLayout
         title="Álgebra Lineal"
         slugs={AlgebraLinealSlugs}

@@ -6,6 +6,7 @@ import BotonUtil from "@/utils/BotonUtil";
 import useAlgebra from "@/hooks/useAlgebra";
 import { Matrix } from "@/types/index";
 import TitleCourse from "@/components/TitleCourse";
+import AppLayout from "@/components/AppLayout";
 
 export default function CramerSolver() {
   const {
@@ -22,7 +23,8 @@ export default function CramerSolver() {
   } = useAlgebra();
 
   return (
-    <div className="p-6 ">
+     <AppLayout title="Segundo Semestre" activeTopicId="2">
+    <div className="p-6 bg-background text-foreground min-h-screen">
       <TitleCourse course="Método de Cramer" />
 
       <div className="flex flex-col gap-2 items-center">
@@ -33,9 +35,9 @@ export default function CramerSolver() {
                 label={`${n}x${n}`}
                 key={n}
                 onClick={() => handleSizeChange3(n)}
-                className={`px-2 py-1 text-xs ${
-                  size2 === n ? "bg-blue-600 text-white" : "bg-gray-200"
-                }`}
+              className={`px-2 py-1 text-xs transition-colors rounded-md shadow-sm ${
+                size2 === n ? "bg-primary text-primary-foreground" : "bg-surface-container-low text-on-surface border border-outline-variant hover:bg-surface-container-high"
+              }`}
               />
             ))}
           </div>
@@ -49,9 +51,9 @@ export default function CramerSolver() {
                     type="number"
                     value={val.toString()}
                     onChange={(e) => handleChange3(e, i, j)}
-                    className={`border p-2 w-12 text-center ${
-                      j === size2 ? "bg-yellow-100" : ""
-                    }`}
+                  className={`border border-outline-variant text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded-md p-2 w-12 text-center transition-all ${
+                    j === size2 ? "bg-primary/20" : "bg-surface-container-lowest"
+                  }`}
                   />
                 ))}
               </div>
@@ -63,18 +65,18 @@ export default function CramerSolver() {
           <BotonUtil
             label="Resolver"
             onClick={solve3}
-            className="px-2 text-xs py-2 bg-green-600 text-white "
+            className="px-4 text-xs py-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow rounded-md"
           />
           <BotonUtil
             label={` ${showFraction ? "Decimales" : "Fracciones"}`}
             onClick={() => setShowFraction(!showFraction)}
-            className="px-2 py-2 text-xs bg-purple-600 text-white "
+            className="px-4 py-2 text-xs bg-surface-container-high text-on-surface hover:bg-surface-container-highest border border-outline-variant transition-colors shadow-sm rounded-md"
           />
         </div>
       </div>
 
       {result && (
-        <div className="flex flex-wrap items-center justify-center  gap-2  p-4 rounded bg-gray-50 ">
+        <div className="flex flex-wrap items-center justify-center gap-4 p-4 rounded-xl bg-surface-container-low border border-outline-variant shadow-sm">
           {result.sols.map((sol, i) => {
             const coeffs = matrix3.map((row) => row.slice(0, size2));
             const constants: Fraction[] = matrix3.map(
@@ -89,7 +91,7 @@ export default function CramerSolver() {
             return (
               <div
                 key={i}
-                className="flex flex-col gap-2 items-center bg-gray-100 p-1 w-96"
+                className="flex flex-col gap-2 items-center bg-surface-container-lowest border border-outline-variant shadow-sm rounded-xl p-4 w-96"
               >
                 <p>
                   Valor de <InlineMath math={`x_{${i + 1}}`} />
@@ -103,7 +105,7 @@ export default function CramerSolver() {
 {\\begin{vmatrix} ${matrixToString(coeffs)} \\end{vmatrix}}`}
                   />
 
-                  <div className="w-auto h-16 max-sm:h-10 flex items-center  text-xl overflow-x-auto max-w-full max-sm:text-xs bg-gray-200 rounded-xl px-2">
+                  <div className="w-auto h-16 max-sm:h-10 flex items-center text-xl overflow-x-auto max-w-full max-sm:text-xs bg-surface-container-high text-on-surface rounded-xl px-4 mt-2">
                     <InlineMath
                       math={`  
  \\frac{${determinantExpression(modified)}}{${determinantExpression(coeffs)}} 
@@ -136,6 +138,6 @@ export default function CramerSolver() {
           />
         </h3>
       )}
-    </div>
+    </div></AppLayout>
   );
 }

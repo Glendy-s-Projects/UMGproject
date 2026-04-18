@@ -3,6 +3,7 @@ import useMatematicaDiscreta from "@/hooks/useMatematicaDiscreta";
 import BotonUtil from "@/utils/BotonUtil";
 import { InlineMath } from "react-katex";
 import TitleCourse from "@/components/TitleCourse";
+import AppLayout from "@/components/AppLayout";
 
 const Binario = () => {
   const {
@@ -19,6 +20,7 @@ const Binario = () => {
   } = useMatematicaDiscreta();
 
   return (
+     <AppLayout title="Segundo Semestre" activeTopicId="2">
     <div className="flex flex-col  min-h-screen bg-gray-100 p-4">
       <TitleCourse course="Conversor Binario ⇄ Decimal" />
 
@@ -210,7 +212,7 @@ const Binario = () => {
           caracteres distintos de 0 y 1.
         </p>
       </div>
-    </div>
+    </div></AppLayout>
   );
 };
 

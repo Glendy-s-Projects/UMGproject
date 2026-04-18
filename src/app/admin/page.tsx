@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
+import { useEffect, Suspense } from "react";
 import { useAdmin } from "../../../lib/useAdmin";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaEdit } from "react-icons/fa";

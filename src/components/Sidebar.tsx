@@ -38,7 +38,7 @@ const Sidebar = ({
   return (
     <ShadcnSidebar
       collapsible="icon"
-      className="z-40 border-r border-outline-variant/15 bg-neutral-50/60 dark:bg-neutral-950/60 backdrop-blur-2xl"
+      className="z-40 border-r border-outline-variant/15 bg-surface-container-high dark:bg-neutral-950/60 backdrop-blur-2xl"
     >
       <SidebarHeader className="flex items-center h-20 w-full max-w-screen-2xl mx-auto gap-2 md:gap-4 text-xl md:text-2xl font-black tracking-tighter text-neutral-900 dark:text-neutral-50 uppercase">
         UMG
@@ -51,11 +51,10 @@ const Sidebar = ({
                 <SidebarMenuButton
                   asChild
                   tooltip={topic.semester}
-                  isActive={activeTopicId === topic.$id}
                   className={`flex items-center w-full p-3 rounded-lg font-bold transition-all duration-300 cursor-pointer h-auto ${
                     activeTopicId === topic.$id
-                      ? "bg-primary text-white hover:bg-primary/90 hover:text-white"
-                      : "bg-neutral-200/50 dark:bg-neutral-800/50 text-neutral-900 dark:text-neutral-50 hover:bg-neutral-300/50 dark:hover:bg-neutral-700/50"
+                      ? "!bg-primary !text-white hover:!bg-primary/90 hover:!text-white"
+                      : "bg-neutral-200/50 dark:bg-neutral-800/50 !text-neutral-900 dark:!text-neutral-50 hover:bg-neutral-300/50 dark:hover:bg-neutral-700/50 hover:!text-neutral-900 dark:hover:!text-neutral-50"
                   }`}
                 >
                   <button onClick={() => onTopicSelect(topic.$id)}>
@@ -98,7 +97,7 @@ const Sidebar = ({
             <SidebarMenuButton
               asChild
               tooltip="Cerrar Sesión"
-              className="flex items-center w-full p-3 h-auto text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50 transition-all ease-in-out rounded-lg cursor-pointer"
+              className="flex items-center w-full p-3 h-auto !text-neutral-500 dark:!text-neutral-400 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50 hover:!text-neutral-700 dark:hover:!text-neutral-300 transition-all ease-in-out rounded-lg cursor-pointer"
             >
               <button onClick={onLogout} disabled={isLogoutPending}>
                 <span className="flex items-center justify-center">

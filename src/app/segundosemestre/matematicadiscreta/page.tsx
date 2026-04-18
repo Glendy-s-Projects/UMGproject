@@ -8,7 +8,7 @@ import useCourseData from "@/hooks/useCourseData";
 const MatematicaDiscreta = () => {
   const { videos, files, loading } = useCourseData("Matemática Discreta");
   return (
-    <AppLayout title="Matemática Discreta" activeTopicId="4">
+    <AppLayout title="Matemática Discreta" activeTopicId="2">
       <MainSemesterLayout
         title="Matemática Discreta"
         slugs={MatematicaDiscretaSlugs}
