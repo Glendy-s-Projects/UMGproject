@@ -22,6 +22,21 @@ export const databases = new Databases(client);
 
 //-- Funciones para interactuar con la base de datos -//
 //-- CREATE --//
+export const createTopic = async (semesterName: string) => {
+  try {
+    const topic = await databases.createDocument(
+      appwriteConfig.databaseId!,
+      appwriteConfig.topicCollectionId!,
+      "unique()",
+      { semester: semesterName }
+    );
+    return topic;
+  } catch (error) {
+    console.error("Error creating topic:", error);
+    throw error;
+  }
+};
+
 export const createVideo = async (
   name: string,
   youtubeCode: string,
@@ -267,6 +282,20 @@ export const updateFile = async (
 };
 
 //-- DELETE --//
+export const deleteTopic = async (topicId: string) => {
+  try {
+    const result = await databases.deleteDocument(
+      appwriteConfig.databaseId!,
+      appwriteConfig.topicCollectionId!,
+      topicId
+    );
+    return result;
+  } catch (error) {
+    console.error("Error deleting topic:", error);
+    throw error;
+  }
+};
+
 export const deleteCourse = async (courseId: string) => {
   try {
     const result = await databases.deleteDocument(

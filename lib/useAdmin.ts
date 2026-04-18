@@ -6,6 +6,7 @@ import {
   createFile,
   createVideo,
   getCourses,
+  createTopic,
   getTopics,
   getFiles,
   getVideos,
@@ -16,6 +17,7 @@ import {
   deleteCourse,
   deleteVideo,
   deleteFile,
+  deleteTopic,
 } from "./appwrite";
 import { Course, Topic } from "../type";
 import { toast } from "react-toastify";
@@ -66,7 +68,10 @@ export const useAdmin = (activeTopicId?: string | null) => {
     queryFn: async () => {
       try {
         return await account.get();
-      } catch {
+      } catch (error: any) {
+        if (error?.code !== 401) {
+          console.error("Error inesperado al obtener la sesión:", error);
+        }
         return null;
       }
     },
@@ -122,7 +127,7 @@ export const useAdmin = (activeTopicId?: string | null) => {
   });
 
   const createCourseMutation = useMutation({
-    mutationFn: () => createCourse(courseName, selectedTopic),
+    mutationFn: (topicId: string) => createCourse(courseName, topicId),
     onSuccess: () => {
       toast.success("Curso agregado exitosamente");
       setCourseName("");
@@ -154,6 +159,15 @@ export const useAdmin = (activeTopicId?: string | null) => {
       queryClient.invalidateQueries({ queryKey: ["files"] });
     },
     onError: () => toast.error("Error al agregar archivo"),
+  });
+
+  const createTopicMutation = useMutation({
+    mutationFn: (newSemesterName: string) => createTopic(newSemesterName),
+    onSuccess: () => {
+      toast.success("Semestre agregado exitosamente");
+      queryClient.invalidateQueries({ queryKey: ["topics"] });
+    },
+    onError: () => toast.error("Error al agregar semestre"),
   });
 
   //---CRUD de Topics---//
@@ -233,6 +247,15 @@ export const useAdmin = (activeTopicId?: string | null) => {
   });
 
   //-- DELETE --//
+  const deleteTopicMutation = useMutation({
+    mutationFn: (topicId: string) => deleteTopic(topicId),
+    onSuccess: () => {
+      toast.success("Semestre eliminado exitosamente");
+      queryClient.invalidateQueries({ queryKey: ["topics"] });
+    },
+    onError: () => toast.error("Error al eliminar el semestre"),
+  });
+
   const deleteCourseMutation = useMutation({
     mutationFn: (courseId: string) => deleteCourse(courseId),
     onSuccess: () => {
@@ -261,9 +284,9 @@ export const useAdmin = (activeTopicId?: string | null) => {
   });
 
   //-- Manejadores de eventos --//
-  const handleCreateCourse = (e: FormEvent) => {
+  const handleCreateCourse = (e: FormEvent, topicId: string) => {
     e.preventDefault();
-    createCourseMutation.mutate();
+    createCourseMutation.mutate(topicId);
   };
 
   const handleCreateVideo = (e: FormEvent, courseId: string) => {
@@ -305,6 +328,7 @@ export const useAdmin = (activeTopicId?: string | null) => {
     loginMutation,
     logoutMutation,
     createCourseMutation,
+    createTopicMutation,
     createVideoMutation,
     createFileMutation,
     handleCreateCourse,
@@ -341,5 +365,6 @@ export const useAdmin = (activeTopicId?: string | null) => {
     deleteCourseMutation,
     deleteVideoMutation,
     deleteFileMutation,
+    deleteTopicMutation,
   };
 };

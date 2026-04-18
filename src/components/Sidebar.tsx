@@ -24,6 +24,7 @@ interface AppSidebarProps {
   onTopicSelect: (topicId: string) => void;
   onLogout?: () => void;
   isLogoutPending?: boolean;
+  onCreateTopic?: () => void;
   isAdmin?: boolean;
 }
 
@@ -32,6 +33,7 @@ const Sidebar = ({
   activeTopicId,
   onTopicSelect,
   onLogout,
+  onCreateTopic,
   isLogoutPending,
   isAdmin = false,
 }: AppSidebarProps) => {
@@ -76,12 +78,16 @@ const Sidebar = ({
         {isAdmin && (
           <>
             <div className="group-data-[collapsible=icon]:hidden w-full">
-              <button className="w-full bg-primary text-white py-3 px-4 rounded-md font-bold text-sm uppercase tracking-widest hover:bg-primary/90 transition-colors">
-                New Course
+              <button
+                onClick={onCreateTopic}
+                className="w-full bg-primary text-white py-3 px-4 rounded-md font-bold text-sm uppercase tracking-widest hover:bg-primary/90 transition-colors"
+              >
+                Nuevo Semestre
               </button>
             </div>
             <div className="hidden group-data-[collapsible=icon]:flex w-full justify-center">
               <button
+                onClick={onCreateTopic}
                 className="bg-primary text-white p-2 rounded-md font-bold hover:bg-primary/90 transition-colors"
                 title="New Course"
               >
