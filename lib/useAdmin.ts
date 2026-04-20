@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormEvent, useState } from "react";
+import { AppwriteException } from "appwrite";
 import {
   account,
   createCourse,
@@ -68,8 +69,9 @@ export const useAdmin = (activeTopicId?: string | null) => {
     queryFn: async () => {
       try {
         return await account.get();
-      } catch (error: any) {
-        if (error?.code !== 401) {
+      } catch (error: unknown) {
+        const isAuthError = error instanceof AppwriteException && error.code === 401;
+        if (!isAuthError) {
           console.error("Error inesperado al obtener la sesión:", error);
         }
         return null;
