@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormEvent, useState } from "react";
+import { AppwriteException } from "appwrite";
 import {
   account,
   createCourse,
@@ -18,9 +19,33 @@ import {
   deleteVideo,
   deleteFile,
   deleteTopic,
+  createRecoveryCodes,
+  regenerateRecoveryCodes,
+  setupTotp,
+  verifyTotpSetup,
+  enableMfa,
+  createMfaChallenge,
+  verifyMfaChallenge,
 } from "./appwrite";
 import { Course, Topic } from "../type";
 import { toast } from "react-toastify";
+
+interface AppwriteError {
+  type?: string;
+  code?: number;
+  message?: string;
+}
+
+interface MfaRecoveryCodesResponse {
+  recoveryCodes?: string[];
+  codes?: string[];
+  secret?: string | string[];
+}
+
+interface MfaTotpResponse {
+  uri: string;
+  secret: string;
+}
 
 export const useAdmin = (activeTopicId?: string | null) => {
   const queryClient = useQueryClient();
@@ -61,6 +86,14 @@ export const useAdmin = (activeTopicId?: string | null) => {
   const [editFileName, setEditFileName] = useState("");
   const [editFileRoute, setEditFileRoute] = useState("");
 
+  //-- Estados de MFA --//
+  const [isMfaRequired, setIsMfaRequired] = useState(false);
+  const [mfaChallengeId, setMfaChallengeId] = useState("");
+  const [totpCode, setTotpCode] = useState("");
+  const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
+  const [qrUri, setQrUri] = useState("");
+  const [mfaSetupStep, setMfaSetupStep] = useState(0);
+
   //-- Queries (Estado del servidor)---//
 
   const { data: user, isLoading: isUserLoading } = useQuery({
@@ -68,14 +101,16 @@ export const useAdmin = (activeTopicId?: string | null) => {
     queryFn: async () => {
       try {
         return await account.get();
-      } catch (error: any) {
-        if (error?.code !== 401) {
+      } catch (error: unknown) {
+        const isAuthError = error instanceof AppwriteException && error.code === 401;
+        if (!isAuthError) {
           console.error("Error inesperado al obtener la sesión:", error);
         }
         return null;
       }
     },
     retry: false,
+    enabled: !isMfaRequired, // No intentar obtener usuario si estamos en flujo MFA
   });
 
   const { data: topics = [] } = useQuery({
@@ -110,13 +145,37 @@ export const useAdmin = (activeTopicId?: string | null) => {
   //----MUTATIONS (Acciones)----//
   const loginMutation = useMutation({
     mutationFn: async () => {
-      await account.createEmailPasswordSession({ email, password });
-      return await account.get();
+      try {
+        await account.createEmailPasswordSession({ email, password });
+        return await account.get();
+      } catch (error: unknown) {
+        const appwriteError = error as AppwriteError;
+        // Si el error es por MFA requerido, no lo lanzamos, lo manejamos
+        if (appwriteError?.type === 'user_more_factors_required') {
+          throw error; // Lo lanzamos para que onError lo maneje
+        }
+        throw error;
+      }
     },
     onSuccess: (userData) => queryClient.setQueryData(["user"], userData),
-    onError: () => {
-      queryClient.setQueryData(["user"], null);
-      toast.error("Error al iniciar sesión. Verifica tus credenciales.");
+    onError: async (error: unknown) => {
+      const appwriteError = error as AppwriteError;
+      // Si el error es por MFA requerido
+      if (appwriteError?.type === 'user_more_factors_required') {
+        try {
+          // Crear el desafío MFA
+          const challenge = await createMfaChallenge();
+          setMfaChallengeId(challenge.$id);
+          setIsMfaRequired(true);
+          toast.info("Ingresa tu código de autenticación");
+        } catch (mfaError) {
+          console.error("Error al crear desafío MFA:", mfaError);
+          toast.error("Error al iniciar verificación MFA");
+        }
+      } else {
+        queryClient.setQueryData(["user"], null);
+        toast.error("Error al iniciar sesión. Verifica tus credenciales.");
+      }
     },
   });
 
@@ -168,6 +227,83 @@ export const useAdmin = (activeTopicId?: string | null) => {
       queryClient.invalidateQueries({ queryKey: ["topics"] });
     },
     onError: () => toast.error("Error al agregar semestre"),
+  });
+
+  const generateRecoveryCodesMutation = useMutation({
+    mutationFn: async () => {
+      try {
+        return await createRecoveryCodes();
+      } catch (error: unknown) {
+        const appwriteError = error as AppwriteError & { skipRecovery?: boolean };
+        // Si ya existen códigos, lanzar el error para manejarlo en onError
+        if (appwriteError?.code === 409) {
+          throw { ...appwriteError, skipRecovery: true };
+        }
+        throw error;
+      }
+    },
+    onSuccess: (data: MfaRecoveryCodesResponse) => {
+      // Intentar diferentes estructuras posibles
+      const codes = data.recoveryCodes || data.codes || 
+        (Array.isArray(data.secret) ? data.secret : []) || [];
+      setRecoveryCodes(codes);
+    },
+    onError: (error: unknown) => {
+      const appwriteError = error as AppwriteError & { skipRecovery?: boolean };
+      // No mostrar toast si es el error de códigos ya generados
+      if (!appwriteError?.skipRecovery) {
+        toast.error("Error al generar códigos de recuperación");
+      }
+    },
+  });
+
+  const setupTotpMutation = useMutation({
+    mutationFn: async () => await setupTotp(),
+    onSuccess: (data: MfaTotpResponse) => {
+      setQrUri(data.uri);
+    },
+    onError: () => toast.error("Error al iniciar configuración de TOTP"),
+  });
+
+  const verifyAndEnableMfaMutation = useMutation({
+    mutationFn: async (code: string) => {
+      await verifyTotpSetup(code);
+      await enableMfa();
+      return await account.get();
+    },
+    onSuccess: (userData) => {
+      toast.success("MFA activado exitosamente");
+      setMfaSetupStep(0);
+      queryClient.setQueryData(["user"], userData);
+    },
+    onError: () => toast.error("Código incorrecto o error al activar MFA"),
+  });
+
+  const verifyMfaLoginMutation = useMutation({
+    mutationFn: async ({ challengeId, code }: { challengeId: string; code: string }) => {
+      await verifyMfaChallenge(challengeId, code);
+      return await account.get();
+    },
+    onSuccess: (userData) => {
+      toast.success("Autenticación MFA exitosa");
+      setIsMfaRequired(false);
+      setMfaChallengeId("");
+      setTotpCode("");
+      queryClient.setQueryData(["user"], userData);
+    },
+    onError: async () => {
+      toast.error("Código MFA incorrecto");
+      // Limpiar la sesión parcial si el código es incorrecto
+      try {
+        await account.deleteSession({ sessionId: "current" });
+      } catch (e) {
+        // Ignorar errores al eliminar sesión
+      }
+      // Resetear el estado MFA para que el usuario pueda intentar de nuevo
+      setIsMfaRequired(false);
+      setMfaChallengeId("");
+      setTotpCode("");
+    },
   });
 
   //---CRUD de Topics---//
@@ -319,6 +455,18 @@ export const useAdmin = (activeTopicId?: string | null) => {
     setFileName,
     fileRoute,
     setFileRoute,
+    isMfaRequired,
+    setIsMfaRequired,
+    mfaChallengeId,
+    setMfaChallengeId,
+    totpCode,
+    setTotpCode,
+    recoveryCodes,
+    setRecoveryCodes,
+    qrUri,
+    setQrUri,
+    mfaSetupStep,
+    setMfaSetupStep,
     user,
     isUserLoading,
     topics,
@@ -327,6 +475,10 @@ export const useAdmin = (activeTopicId?: string | null) => {
     videos,
     loginMutation,
     logoutMutation,
+    verifyMfaLoginMutation,
+    generateRecoveryCodesMutation,
+    setupTotpMutation,
+    verifyAndEnableMfaMutation,
     createCourseMutation,
     createTopicMutation,
     createVideoMutation,

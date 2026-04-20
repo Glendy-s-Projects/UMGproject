@@ -19,9 +19,10 @@ import {
   DialogTitle,
 } from "@/context/components/ui/dialog";
 import { IoIosArrowDown } from "react-icons/io";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AppLayout from "@/components/AppLayout";
+import { QRCodeSVG } from "qrcode.react";
 
 // Definimos la estructura de los datos que vienen de la base de datos
 interface CourseData {
@@ -46,6 +47,12 @@ interface FileData {
 interface TopicData {
   $id: string;
   semester: string;
+}
+
+interface AppwriteMfaError {
+  code?: number;
+  skipRecovery?: boolean;
+  message?: string;
 }
 
 const AdminPanelContent = () => {
@@ -76,6 +83,18 @@ const AdminPanelContent = () => {
     videos,
     loginMutation,
     logoutMutation,
+    isMfaRequired,
+    mfaChallengeId,
+    totpCode,
+    setTotpCode,
+    recoveryCodes,
+    qrUri,
+    mfaSetupStep,
+    setMfaSetupStep,
+    verifyMfaLoginMutation,
+    generateRecoveryCodesMutation,
+    setupTotpMutation,
+    verifyAndEnableMfaMutation,
     createTopicMutation,
     createCourseMutation,
     courseName,
@@ -124,6 +143,8 @@ const AdminPanelContent = () => {
   const [isTopicDialogOpen, setIsTopicDialogOpen] = useState(false);
   const [newTopicName, setNewTopicName] = useState("");
   const [isCourseDialogOpen, setIsCourseDialogOpen] = useState(false);
+  const [isMfaDialogOpen, setIsMfaDialogOpen] = useState(false);
+  const [savedCodes, setSavedCodes] = useState(false);
   
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
@@ -173,6 +194,7 @@ const AdminPanelContent = () => {
     );
   }
 
+  // Si el usuario ya está autenticado completamente
   if (user) {
     return (
       <AppLayout
@@ -189,6 +211,18 @@ const AdminPanelContent = () => {
         breadcrumbs={[{ label: "Panel de Administración", href: "/admin" }]}
         headerRightContent={
           <div className="flex items-center space-x-4">
+            {user.mfa ? (
+              <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded font-bold uppercase tracking-wider">
+                MFA Activo
+              </span>
+            ) : (
+              <button
+                onClick={() => setIsMfaDialogOpen(true)}
+                className="text-xs bg-surface-container-high hover:bg-surface-dim px-2 py-1 rounded font-bold uppercase tracking-wider transition-colors"
+              >
+                Activar MFA
+              </button>
+            )}
             <div className="text-neutral-900 dark:text-neutral-50 scale-95 transition-transform duration-150 font-bold">
               {user.name}
             </div>
@@ -773,6 +807,124 @@ const AdminPanelContent = () => {
           </DialogContent>
         </Dialog>
 
+        {/* Modal de Configuración MFA */}
+        <Dialog open={isMfaDialogOpen} onOpenChange={(open) => {
+          setIsMfaDialogOpen(open);
+          if (!open) {
+             setMfaSetupStep(0);
+             setSavedCodes(false);
+             setTotpCode("");
+          }
+        }}>
+          <DialogContent className="sm:max-w-md bg-surface-container-lowest border-outline-variant">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black tracking-tight text-on-surface">
+                Autenticación de Dos Pasos
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-4 py-4">
+              {mfaSetupStep === 0 && (
+                <div className="space-y-4">
+                  <p className="text-sm text-on-surface-variant">
+                    La autenticación de dos pasos añade una capa extra de seguridad a tu cuenta. Necesitaremos generar códigos de recuperación antes de continuar.
+                  </p>
+                  <button
+                    onClick={() => {
+                      generateRecoveryCodesMutation.mutate(undefined, {
+                        onSuccess: () => setMfaSetupStep(1),
+                        onError: (error: unknown) => {
+                          const mfaError = error as AppwriteMfaError;
+                          // Si ya existen códigos, generar QR directamente
+                          if (mfaError?.code === 409 || mfaError?.skipRecovery) {
+                            toast.info("Ya tienes códigos de recuperación. Generando código QR...");
+                            setupTotpMutation.mutate(undefined, {
+                              onSuccess: () => setMfaSetupStep(2),
+                            });
+                          }
+                        }
+                      });
+                    }}
+                    disabled={generateRecoveryCodesMutation.isPending || setupTotpMutation.isPending}
+                    className="w-full px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-bold text-sm uppercase transition-colors shadow"
+                  >
+                    {(generateRecoveryCodesMutation.isPending || setupTotpMutation.isPending) ? "Generando..." : "Generar Códigos de Recuperación"}
+                  </button>
+                </div>
+              )}
+
+              {mfaSetupStep === 1 && (
+                <div className="space-y-4">
+                  <p className="text-sm text-destructive font-bold">
+                    ¡Guarda estos códigos en un lugar seguro! Son la única forma de recuperar tu cuenta si pierdes acceso a tu dispositivo.
+                  </p>
+                  <div className="bg-surface-container p-4 rounded-xl font-mono text-sm grid grid-cols-2 gap-2 text-center">
+                    {recoveryCodes.map((code, idx) => (
+                      <div key={idx} className="bg-surface-container-high py-1 rounded">{code}</div>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="checkbox" 
+                      id="savedCodes" 
+                      checked={savedCodes} 
+                      onChange={(e) => setSavedCodes(e.target.checked)} 
+                      className="w-4 h-4 text-primary bg-surface-container-lowest border-outline-variant rounded focus:ring-primary transition-all cursor-pointer"
+                    />
+                    <label htmlFor="savedCodes" className="text-sm cursor-pointer select-none">
+                      He guardado mis códigos de recuperación
+                    </label>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setupTotpMutation.mutate(undefined, {
+                        onSuccess: () => setMfaSetupStep(2),
+                      });
+                    }}
+                    disabled={!savedCodes || setupTotpMutation.isPending}
+                    className="w-full px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-bold text-sm uppercase transition-colors shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {setupTotpMutation.isPending ? "Cargando..." : "Continuar"}
+                  </button>
+                </div>
+              )}
+
+              {mfaSetupStep === 2 && (
+                <div className="space-y-4 flex flex-col items-center">
+                  <p className="text-sm text-on-surface-variant text-center">
+                    Escanea este código QR con tu aplicación de autenticación (Google Authenticator, Authy, etc).
+                  </p>
+                  <div className="bg-white p-4 rounded-xl shadow-sm">
+                    {qrUri && <QRCodeSVG value={qrUri} size={200} />}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Código de 6 dígitos"
+                    value={totpCode}
+                    onChange={(e) => setTotpCode(e.target.value)}
+                    maxLength={6}
+                    className="w-full p-3 text-center text-2xl tracking-widest border border-outline-variant bg-surface-container-lowest text-on-surface rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  />
+                  <button
+                    onClick={() => {
+                      verifyAndEnableMfaMutation.mutate(totpCode, {
+                        onSuccess: () => {
+                          setIsMfaDialogOpen(false);
+                          setTotpCode("");
+                          setMfaSetupStep(0);
+                        }
+                      });
+                    }}
+                    disabled={totpCode.length < 6 || verifyAndEnableMfaMutation.isPending}
+                    className="w-full px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-bold text-sm uppercase transition-colors shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {verifyAndEnableMfaMutation.isPending ? "Verificando..." : "Verificar y Activar"}
+                  </button>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Modal de confirmación general para eliminar */}
         <Dialog open={confirmDialog.isOpen} onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, isOpen: open }))}>
           <DialogContent className="sm:max-w-md bg-surface-container-lowest border-outline-variant">
@@ -809,72 +961,99 @@ const AdminPanelContent = () => {
     );
   }
 
+  // Si no hay usuario, mostrar formulario de login o MFA
   return (
     <div className="min-h-screen flex items-center justify-center bg-background text-foreground px-4">
       <div className="bg-surface-container-lowest border border-outline-variant p-8 rounded-2xl shadow-sm w-full max-w-md">
         <h2 className="text-3xl font-black tracking-tight mb-6 text-center text-on-surface uppercase">
-          Iniciar Sesión
+          {isMfaRequired ? "Verificación" : "Iniciar Sesión"}
         </h2>
-        <form className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 border border-outline-variant bg-surface-container-lowest text-on-surface rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-          />
-          <div className="relative w-full">
+        
+        {isMfaRequired ? (
+          <form className="space-y-4">
+            <p className="text-sm text-center text-on-surface-variant mb-4">
+              Ingresa el código de 6 dígitos de tu aplicación de autenticación.
+            </p>
             <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Contraseña"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 pr-12 border border-outline-variant bg-surface-container-lowest text-on-surface rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+              type="text"
+              placeholder="000000"
+              value={totpCode}
+              onChange={(e) => setTotpCode(e.target.value)}
+              maxLength={6}
+              className="w-full p-3 text-center text-2xl tracking-widest border border-outline-variant bg-surface-container-lowest text-on-surface rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+              autoFocus
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors focus:outline-none flex items-center justify-center"
+              onClick={() => verifyMfaLoginMutation.mutate({ challengeId: mfaChallengeId, code: totpCode })}
+              disabled={totpCode.length < 6 || verifyMfaLoginMutation.isPending}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground p-3 rounded-xl font-bold uppercase tracking-wider transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+              {verifyMfaLoginMutation.isPending ? "Verificando..." : "Verificar Código"}
             </button>
-          </div>
-          <div className="flex items-center space-x-2 px-1">
+          </form>
+        ) : (
+          <form className="space-y-4">
             <input
-              type="checkbox"
-              id="rememberMe"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 text-primary bg-surface-container-lowest border-outline-variant rounded focus:ring-primary transition-all cursor-pointer"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-3 border border-outline-variant bg-surface-container-lowest text-on-surface rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
             />
-            <label
-              htmlFor="rememberMe"
-              className="text-sm text-on-surface-variant font-medium cursor-pointer select-none"
+            <div className="relative w-full">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-3 pr-12 border border-outline-variant bg-surface-container-lowest text-on-surface rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors focus:outline-none flex items-center justify-center"
+              >
+                {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+              </button>
+            </div>
+            <div className="flex items-center space-x-2 px-1">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 text-primary bg-surface-container-lowest border-outline-variant rounded focus:ring-primary transition-all cursor-pointer"
+              />
+              <label
+                htmlFor="rememberMe"
+                className="text-sm text-on-surface-variant font-medium cursor-pointer select-none"
+              >
+                Recordar mis datos
+              </label>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (rememberMe) {
+                  localStorage.setItem(
+                    "adminCreds",
+                    JSON.stringify({
+                      savedEmail: email,
+                      savedPassword: password,
+                    }),
+                  );
+                } else {
+                  localStorage.removeItem("adminCreds");
+                }
+                loginMutation.mutate();
+              }}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground p-3 rounded-xl font-bold uppercase tracking-wider transition-colors shadow-sm"
             >
-              Recordar mis datos
-            </label>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              if (rememberMe) {
-                localStorage.setItem(
-                  "adminCreds",
-                  JSON.stringify({
-                    savedEmail: email,
-                    savedPassword: password,
-                  }),
-                );
-              } else {
-                localStorage.removeItem("adminCreds");
-              }
-              loginMutation.mutate();
-            }}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground p-3 rounded-xl font-bold uppercase tracking-wider transition-colors shadow-sm"
-          >
-            {loginMutation.isPending ? "Iniciando..." : "Iniciar Sesion"}
-          </button>
-        </form>
+              {loginMutation.isPending ? "Iniciando..." : "Iniciar Sesion"}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

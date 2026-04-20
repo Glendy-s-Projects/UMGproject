@@ -16,6 +16,10 @@ import { ToastContainer } from "react-toastify";
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
+  display: "swap",
+  preload: true,
+  adjustFontFallback: true,
+  fallback: ["monospace"], // Fuente de respaldo explícita
 });
 
 export const metadata: Metadata = {
