@@ -1,4 +1,4 @@
-import { Account, Client, Databases, Query } from "appwrite";
+import { Account, Client, Databases, Query, AuthenticatorType, AuthenticationFactor } from "appwrite";
 
 export const appwriteConfig = {
   endpoint: process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT,
@@ -13,6 +13,8 @@ export const appwriteConfig = {
 };
 
 export const client = new Client();
+export const account = new Account(client);
+export { ID } from "appwrite";
 
 client
   .setEndpoint(appwriteConfig.endpoint!) // Your API Endpoint
@@ -338,5 +340,93 @@ export const deleteFile = async (fileId: string) => {
   }
 };
 
-export const account = new Account(client);
-export { ID } from "appwrite";
+//-- Funciones para MFA (Multi-Factor Authentication) --//
+
+/**
+ * Genera un nuevo set de códigos de recuperación para el usuario autenticado.
+ */
+export const createRecoveryCodes = async () => {
+  try {
+    return await account.createMfaRecoveryCodes();
+  } catch (error) {
+    console.error("Error al generar códigos de recuperación:", error);
+    throw error;
+  }
+};
+
+/**
+ * Regenera los códigos de recuperación (invalida los anteriores).
+ */
+export const regenerateRecoveryCodes = async () => {
+  try {
+    return await account.updateMfaRecoveryCodes();
+  } catch (error) {
+    console.error("Error al regenerar códigos de recuperación:", error);
+    throw error;
+  }
+};
+
+/**
+ * Inicia el proceso de configuración de TOTP (ej. Google Authenticator).
+ * Retorna un objeto que incluye una URI para generar un código QR.
+ */
+export const setupTotp = async () => {
+  try {
+    return await account.createMfaAuthenticator(AuthenticatorType.Totp);
+  } catch (error) {
+    console.error("Error al iniciar la configuración de TOTP:", error);
+    throw error;
+  }
+};
+
+/**
+ * Verifica el código TOTP proporcionado por el usuario para completar la configuración.
+ * @param code El código de 6 dígitos de la app de autenticación.
+ */
+export const verifyTotpSetup = async (code: string) => {
+  try {
+    return await account.updateMfaAuthenticator(AuthenticatorType.Totp, code);
+  } catch (error) {
+    console.error("Error al verificar el código TOTP:", error);
+    throw error;
+  }
+};
+
+/**
+ * Activa MFA para la cuenta del usuario. Debe llamarse después de una configuración exitosa.
+ */
+export const enableMfa = async () => {
+  try {
+    return await account.updateMFA(true);
+  } catch (error) {
+    console.error("Error al activar MFA:", error);
+    throw error;
+  }
+};
+
+/**
+ * Crea un desafío MFA para el proceso de login. Se usa cuando una acción
+ * requiere un segundo factor de autenticación.
+ */
+export const createMfaChallenge = async () => {
+  try {
+    return await account.createMfaChallenge(AuthenticationFactor.Totp);
+  } catch (error) {
+    console.error("Error al crear el desafío MFA:", error);
+    throw error;
+  }
+};
+
+/**
+ * Verifica un desafío MFA para completar el proceso de login.
+ * @param challengeId El ID del desafío obtenido del paso anterior.
+ * @param code El código TOTP del usuario.
+ */
+export const verifyMfaChallenge = async (challengeId: string, code: string) => {
+  try {
+    return await account.updateMfaChallenge(challengeId, code);
+  } catch (error) {
+    console.error("Error al verificar el desafío MFA:", error);
+    throw error;
+  }
+};
