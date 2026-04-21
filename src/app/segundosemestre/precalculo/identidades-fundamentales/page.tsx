@@ -4,6 +4,7 @@ import "katex/dist/katex.min.css";
 import usePrecalculo from "@/hooks/usePrecalculo";
 import { Quadrant } from "@/types/index";
 import TitleCourse from "@/components/TitleCourse";
+import AppLayout from "@/components/AppLayout";
 
 export default function TrigonometriaFracciones() {
   const {
@@ -29,7 +30,8 @@ export default function TrigonometriaFracciones() {
     cotDen,
   } = usePrecalculo();
   return (
-    <div className="flex flex-col gap-4  min-h-screen  bg-gray-100 p-4">
+     <AppLayout title="Segundo Semestre" activeTopicId="2">
+    <div className="flex flex-col gap-4 min-h-screen bg-background text-foreground p-4">
       <TitleCourse course="Identidades Fundamentales" />
 
       {/* Inputs */}
@@ -40,7 +42,7 @@ export default function TrigonometriaFracciones() {
             type="number"
             value={sinNum}
             onChange={(e) => setSinNum(Number(e.target.value))}
-            className="border rounded px-2 py-1 w-20"
+            className="border border-outline-variant bg-surface-container-lowest text-on-surface rounded-md px-2 py-1 w-20 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
           />
         </div>
         <div>
@@ -49,7 +51,7 @@ export default function TrigonometriaFracciones() {
             type="number"
             value={sinDen}
             onChange={(e) => setSinDen(Number(e.target.value))}
-            className="border rounded px-2 py-1 w-20"
+            className="border border-outline-variant bg-surface-container-lowest text-on-surface rounded-md px-2 py-1 w-20 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
           />
         </div>
         <div>
@@ -57,7 +59,7 @@ export default function TrigonometriaFracciones() {
           <select
             value={quadrant}
             onChange={(e) => setQuadrant(Number(e.target.value) as Quadrant)}
-            className="border rounded px-2 py-1"
+            className="border border-outline-variant bg-surface-container-lowest text-on-surface rounded-md px-2 py-1 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
           >
             <option value={1}>I</option>
             <option value={2}>II</option>
@@ -73,7 +75,7 @@ export default function TrigonometriaFracciones() {
 
       <div className="flex flex-wrap w-full justify-center gap-2 ">
         {/* Cosecante */}
-        <div className="border-l-4 border-blue-500 bg-blue-400/10 p-1 w-auto">
+        <div className="border-l-4 border-blue-500 bg-surface-container-low text-on-surface p-3 rounded-r-xl w-auto shadow-sm">
           <h2 className="text-xl font-semibold">a. Cosecante</h2>
           <BlockMath
             math={`\\csc t = \\dfrac{1}{\\sin t} = ${fracLatex2(
@@ -84,7 +86,7 @@ export default function TrigonometriaFracciones() {
         </div>
 
         {/* Coseno */}
-        <div className="border-l-4 border-green-500  bg-green-500/10 p-1 w-auto">
+        <div className="border-l-4 border-green-500 bg-surface-container-low text-on-surface p-3 rounded-r-xl w-auto shadow-sm">
           <h2 className="text-xl font-semibold">b. Coseno</h2>
           <BlockMath math="\\sin^2 t + \\cos^2 t = 1" />
           <BlockMath
@@ -112,7 +114,7 @@ export default function TrigonometriaFracciones() {
         </div>
 
         {/* Secante */}
-        <div className="border-l-4 border-red-500 bg-red-500/10 p-1 w-auto">
+        <div className="border-l-4 border-red-500 bg-surface-container-low text-on-surface p-3 rounded-r-xl w-auto shadow-sm">
           <h2 className="text-xl font-semibold">c. Secante</h2>
           <BlockMath
             math={`\\sec t = \\dfrac{1}{\\cos t} = ${fracLatex2(
@@ -123,7 +125,7 @@ export default function TrigonometriaFracciones() {
         </div>
 
         {/* Tangente */}
-        <div className="border-l-4 border-purple-500 bg-purple-500/10 p-1 w-auto">
+        <div className="border-l-4 border-purple-500 bg-surface-container-low text-on-surface p-3 rounded-r-xl w-auto shadow-sm">
           <h2 className="text-xl font-semibold">d. Tangente</h2>
           <BlockMath math={`\\tan t = \\dfrac{\\sin t}{\\cos t}`} />
           <BlockMath
@@ -136,13 +138,13 @@ export default function TrigonometriaFracciones() {
         </div>
 
         {/* Cotangente */}
-        <div className="border-l-4 border-orange-500 bg-orange-500/10 p-1 w-auto">
+        <div className="border-l-4 border-orange-500 bg-surface-container-low text-on-surface p-3 rounded-r-xl w-auto shadow-sm">
           <h2 className="text-xl font-semibold">e. Cotangente</h2>
           <BlockMath math={`\\cot t = \\dfrac{1}{\\tan t}`} />
           <BlockMath math={`= \\dfrac{1}{${fracLatex2(tanNum, tanDen)}}`} />
           <BlockMath math={`= ${fracLatex2(cotNum, cotDen)}`} />
         </div>
       </div>
-    </div>
+    </div></AppLayout>
   );
 }

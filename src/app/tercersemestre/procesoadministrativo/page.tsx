@@ -1,15 +1,22 @@
-"use client"
-import SubTitleCards from "@/components/SubTitleCards";
-import TitleCourse from "@/components/TitleCourse";
+"use client";
+import AppLayout from "@/components/AppLayout";
+import MainSemesterLayout from "@/components/MainSemesterLayout";
+import useCourseData from "@/hooks/useCourseData";
 import { ProcesoAdministrativoSlugs } from "@/utils/data/routes";
 import React from "react";
 
 const ProcesoAdministrativo = () => {
+  const { videos, files, loading } = useCourseData("Proceso Administrativo");
   return (
-    <div className="min-h-screen p-4 w-full flex flex-col gap-2 bg-gray-100">
-      <TitleCourse course="Proceso Administrativo" />
-       <SubTitleCards slugLinks={ProcesoAdministrativoSlugs} bgColor="bg-green-300" /> 
-    </div>
+    <AppLayout title="Proceso Administrativo" activeTopicId="3">
+      <MainSemesterLayout
+        title="Proceso Administrativo"
+        slugs={ProcesoAdministrativoSlugs}
+        videos={videos}
+        files={files}
+        loading={loading}
+      />
+    </AppLayout>
   );
 };
 

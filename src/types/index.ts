@@ -291,6 +291,7 @@ export type routetype = {
   bgColor: string;
   image: string;
   subroutes?: slugstype[];
+  icon?: React.ElementType;
 };
 
 export type SemesterType = {
@@ -300,6 +301,7 @@ export type SemesterType = {
   routes: routetype[];
   bgColor: string;
   image: string;
+  acronym: string;
 };
 
 export type Quadrant = 1 | 2 | 3 | 4;

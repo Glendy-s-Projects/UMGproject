@@ -4,6 +4,7 @@ import { BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import usePrecalculo from "@/hooks/usePrecalculo";
 import TitleCourse from "@/components/TitleCourse";
+import AppLayout from "@/components/AppLayout";
 
 const GeometriaPQ: React.FC = () => {
   const {
@@ -26,6 +27,7 @@ const GeometriaPQ: React.FC = () => {
     "flex flex-col h-full items-center justify-center gap-1 border-2 border-black rounded-2xl w-full";
 
   return (
+    <AppLayout title="Segundo Semestre" activeTopicId="2">
     <div className="px-4 py-2 min-h-screen flex flex-col  gap-2">
       <TitleCourse course="Distancia, Punto Medio,Pendiente, Ecuación de la recta" />
       <div className="flex  gap-2 w-full items-center justify-center">
@@ -143,7 +145,7 @@ const GeometriaPQ: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div></AppLayout>
   );
 };
 

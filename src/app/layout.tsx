@@ -4,6 +4,23 @@ import { MatematicaDiscretaProvider } from "@/context/MatematicaDiscretaProvider
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { PrecalculoProvider } from "@/context/PrecalculoProvider";
 import "./globals.css";
+import Providers from "./Providers";
+import { JetBrains_Mono } from "next/font/google";
+import { cn } from "@/context/lib/utils";
+import { TooltipProvider } from "@/context/components/ui/tooltip";
+import {
+  SidebarProvider,
+} from "@/context/components/ui/sidebar";
+import { ToastContainer } from "react-toastify";
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+  preload: true,
+  adjustFontFallback: true,
+  fallback: ["monospace"], // Fuente de respaldo explícita
+});
 
 export const metadata: Metadata = {
   title: "UMG Programms",
@@ -16,18 +33,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn("font-mono", jetbrainsMono.variable)}
+    >
       <body suppressHydrationWarning>
-        <AlgebraProvider>
-          <MatematicaDiscretaProvider>
-            <PrecalculoProvider>
-              {children}
-
-              <GoogleAnalytics gaId="G-4DQL7T0JLJ" />
-              <GoogleTagManager gtmId="GTM-TG63XJCB" />
-            </PrecalculoProvider>
-          </MatematicaDiscretaProvider>
-        </AlgebraProvider>
+        <Providers>
+          <AlgebraProvider>
+            <MatematicaDiscretaProvider>
+              <PrecalculoProvider>
+                <TooltipProvider>
+                  <SidebarProvider defaultOpen={true}>
+                    <ToastContainer position="bottom-right" theme="colored" />
+                    {children}
+                    <GoogleAnalytics gaId="G-4DQL7T0JLJ" />
+                    <GoogleTagManager gtmId="GTM-TG63XJCB" />
+                  </SidebarProvider>
+                </TooltipProvider>
+              </PrecalculoProvider>
+            </MatematicaDiscretaProvider>
+          </AlgebraProvider>
+        </Providers>
       </body>
     </html>
   );

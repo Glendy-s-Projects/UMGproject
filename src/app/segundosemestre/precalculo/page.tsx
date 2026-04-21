@@ -1,18 +1,22 @@
 "use client";
-import SubTitleCards from "@/components/SubTitleCards";
-import TitleCourse from "@/components/TitleCourse";
 import { PrecalculoSlugs } from "@/utils/data/routes";
-
-
+import AppLayout from "@/components/AppLayout";
+import useCourseData from "@/hooks/useCourseData";
+import MainSemesterLayout from "@/components/MainSemesterLayout";
 
 const Precalculo = () => {
+  const { videos, files, loading } = useCourseData("Precalculo");
 
-  
   return (
-    <section className="flex flex-col gap-3  min-h-screen bg-gray-100 p-4">
-      <TitleCourse course="Precálculo" />
-      <SubTitleCards slugLinks={PrecalculoSlugs} bgColor="bg-teal-300" />
-    </section>
+    <AppLayout title="Segundo Semestre" activeTopicId="2">
+      <MainSemesterLayout
+        title="Precálculo"
+        slugs={PrecalculoSlugs}
+        videos={videos}
+        files={files}
+        loading={loading}
+      />
+    </AppLayout>
   );
 };
 

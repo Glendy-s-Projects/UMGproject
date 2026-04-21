@@ -1,16 +1,19 @@
 "use client";
-import Cards from "@/components/Cards";
 import TitleCourse from "@/components/TitleCourse";
 import { SegundoSemestreCursos } from "@/utils/data/routes";
-import React from "react";
+import AppLayout from "@/components/AppLayout";
+import Grids from "@/components/Grids";
 
 const SegundoSemestre = () => {
   return (
-    <section className="min-h-screen flex flex-col items-center gap-2 p-4 ">
-      <TitleCourse course="Segundo Semestre" />
-
-      <Cards optionCards={SegundoSemestreCursos} />
-    </section>
+    <AppLayout title="Segundo Semestre" activeTopicId="2">
+      <section className="min-h-screen flex flex-col items-center gap-2 p-4">
+        <div className="max-w-7xl mx-auto">
+          <TitleCourse course="Segundo Semestre" />
+          <Grids mainSemester={SegundoSemestreCursos} />
+        </div>
+      </section>
+    </AppLayout>
   );
 };
 
