@@ -7,7 +7,7 @@ import { Programacion1Slugs } from "@/utils/data/routes";
 import React from "react";
 
 const Programacion1 = () => {
-  const { videos, files, loading } = useCourseData("Programación 1");
+  const { videos, files, loading } = useCourseData("Programación I");
   return (
     <AppLayout title="Programación 1" activeTopicId="3">
       <MainSemesterLayout

@@ -23,6 +23,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AppLayout from "@/components/AppLayout";
 import { QRCodeSVG } from "qrcode.react";
+import Image from "next/image";
+import Link from "next/link";
 
 // Definimos la estructura de los datos que vienen de la base de datos
 interface CourseData {
@@ -145,7 +147,7 @@ const AdminPanelContent = () => {
   const [isCourseDialogOpen, setIsCourseDialogOpen] = useState(false);
   const [isMfaDialogOpen, setIsMfaDialogOpen] = useState(false);
   const [savedCodes, setSavedCodes] = useState(false);
-  
+
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     title: string;
@@ -177,7 +179,11 @@ const AdminPanelContent = () => {
     }
   }, [setEmail, setPassword]);
 
-  const confirmAction = (title: string, description: string, action: () => void) => {
+  const confirmAction = (
+    title: string,
+    description: string,
+    action: () => void,
+  ) => {
     setConfirmDialog({
       isOpen: true,
       title,
@@ -300,7 +306,7 @@ const AdminPanelContent = () => {
                           deleteTopicMutation.mutate(activeTopic.$id, {
                             onSuccess: () => router.replace("/admin"),
                           });
-                        }
+                        },
                       );
                     }}
                     disabled={deleteTopicMutation.isPending}
@@ -396,7 +402,7 @@ const AdminPanelContent = () => {
                               "¿Estás seguro de que deseas eliminar este curso? Esta acción no se puede deshacer.",
                               () => {
                                 deleteCourseMutation.mutate(course.$id);
-                              }
+                              },
                             );
                           }}
                           disabled={deleteCourseMutation.isPending}
@@ -518,17 +524,33 @@ const AdminPanelContent = () => {
                                 key={video.$id}
                                 className="group flex items-center justify-between p-4 bg-surface-container-lowest hover:bg-surface-dim transition-all duration-200 rounded-lg"
                               >
-                                <div className="flex items-center gap-4">
+                                <Link
+                                  className="flex items-center gap-4"
+                                  href={`https://www.youtube.com/watch?v=${video.youtubeCode}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
                                   <div className="w-12 h-8 bg-surface-container-highest rounded flex items-center justify-center overflow-hidden relative text-primary">
                                     <RxVideo size={20} />
+                                    <Image
+                                      src={`https://img.youtube.com/vi/${video.youtubeCode}/mqdefault.jpg`}
+                                      alt={video.name}
+                                      className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity"
+                                      width={320}
+                                      height={180}
+                                    />
                                   </div>
-                                  <span className="body-md font-medium text-on-surface">
+
+                                  <span className="body-md flex flex-col gap-0 font-medium text-on-surface">
                                     {video.name}
+                                    <span className="body-md text-[0.6rem] text-on-surface-variant ">
+                                      {video.youtubeCode}
+                                    </span>
                                   </span>
-                                </div>
+                                </Link>
                                 <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                   <button
-                                    className="material-symbols-outlined text-sm text-on-surface-variant hover:text-primary transition-colors"
+                                    className="material-symbols-outlined text-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
                                     onClick={() => {
                                       setEditingVideoId(video.$id);
                                       setEditVideoName(video.name);
@@ -538,14 +560,14 @@ const AdminPanelContent = () => {
                                     <FaEdit />
                                   </button>
                                   <button
-                                    className="material-symbols-outlined text-sm text-on-surface-variant hover:text-error transition-colors"
+                                    className="material-symbols-outlined text-sm text-on-surface-variant hover:text-error transition-colors cursor-pointer"
                                     onClick={() => {
                                       confirmAction(
                                         "Eliminar Video",
                                         "¿Estás seguro de que deseas eliminar este video?",
                                         () => {
                                           deleteVideoMutation.mutate(video.$id);
-                                        }
+                                        },
                                       );
                                     }}
                                     disabled={deleteVideoMutation.isPending}
@@ -690,7 +712,7 @@ const AdminPanelContent = () => {
                                         "¿Estás seguro de que deseas eliminar este archivo?",
                                         () => {
                                           deleteFileMutation.mutate(file.$id);
-                                        }
+                                        },
                                       );
                                     }}
                                     disabled={deleteFileMutation.isPending}
@@ -808,14 +830,17 @@ const AdminPanelContent = () => {
         </Dialog>
 
         {/* Modal de Configuración MFA */}
-        <Dialog open={isMfaDialogOpen} onOpenChange={(open) => {
-          setIsMfaDialogOpen(open);
-          if (!open) {
-             setMfaSetupStep(0);
-             setSavedCodes(false);
-             setTotpCode("");
-          }
-        }}>
+        <Dialog
+          open={isMfaDialogOpen}
+          onOpenChange={(open) => {
+            setIsMfaDialogOpen(open);
+            if (!open) {
+              setMfaSetupStep(0);
+              setSavedCodes(false);
+              setTotpCode("");
+            }
+          }}
+        >
           <DialogContent className="sm:max-w-md bg-surface-container-lowest border-outline-variant">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black tracking-tight text-on-surface">
@@ -826,7 +851,9 @@ const AdminPanelContent = () => {
               {mfaSetupStep === 0 && (
                 <div className="space-y-4">
                   <p className="text-sm text-on-surface-variant">
-                    La autenticación de dos pasos añade una capa extra de seguridad a tu cuenta. Necesitaremos generar códigos de recuperación antes de continuar.
+                    La autenticación de dos pasos añade una capa extra de
+                    seguridad a tu cuenta. Necesitaremos generar códigos de
+                    recuperación antes de continuar.
                   </p>
                   <button
                     onClick={() => {
@@ -835,19 +862,30 @@ const AdminPanelContent = () => {
                         onError: (error: unknown) => {
                           const mfaError = error as AppwriteMfaError;
                           // Si ya existen códigos, generar QR directamente
-                          if (mfaError?.code === 409 || mfaError?.skipRecovery) {
-                            toast.info("Ya tienes códigos de recuperación. Generando código QR...");
+                          if (
+                            mfaError?.code === 409 ||
+                            mfaError?.skipRecovery
+                          ) {
+                            toast.info(
+                              "Ya tienes códigos de recuperación. Generando código QR...",
+                            );
                             setupTotpMutation.mutate(undefined, {
                               onSuccess: () => setMfaSetupStep(2),
                             });
                           }
-                        }
+                        },
                       });
                     }}
-                    disabled={generateRecoveryCodesMutation.isPending || setupTotpMutation.isPending}
+                    disabled={
+                      generateRecoveryCodesMutation.isPending ||
+                      setupTotpMutation.isPending
+                    }
                     className="w-full px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-bold text-sm uppercase transition-colors shadow"
                   >
-                    {(generateRecoveryCodesMutation.isPending || setupTotpMutation.isPending) ? "Generando..." : "Generar Códigos de Recuperación"}
+                    {generateRecoveryCodesMutation.isPending ||
+                    setupTotpMutation.isPending
+                      ? "Generando..."
+                      : "Generar Códigos de Recuperación"}
                   </button>
                 </div>
               )}
@@ -855,22 +893,31 @@ const AdminPanelContent = () => {
               {mfaSetupStep === 1 && (
                 <div className="space-y-4">
                   <p className="text-sm text-destructive font-bold">
-                    ¡Guarda estos códigos en un lugar seguro! Son la única forma de recuperar tu cuenta si pierdes acceso a tu dispositivo.
+                    ¡Guarda estos códigos en un lugar seguro! Son la única forma
+                    de recuperar tu cuenta si pierdes acceso a tu dispositivo.
                   </p>
                   <div className="bg-surface-container p-4 rounded-xl font-mono text-sm grid grid-cols-2 gap-2 text-center">
                     {recoveryCodes.map((code, idx) => (
-                      <div key={idx} className="bg-surface-container-high py-1 rounded">{code}</div>
+                      <div
+                        key={idx}
+                        className="bg-surface-container-high py-1 rounded"
+                      >
+                        {code}
+                      </div>
                     ))}
                   </div>
                   <div className="flex items-center gap-2">
-                    <input 
-                      type="checkbox" 
-                      id="savedCodes" 
-                      checked={savedCodes} 
-                      onChange={(e) => setSavedCodes(e.target.checked)} 
+                    <input
+                      type="checkbox"
+                      id="savedCodes"
+                      checked={savedCodes}
+                      onChange={(e) => setSavedCodes(e.target.checked)}
                       className="w-4 h-4 text-primary bg-surface-container-lowest border-outline-variant rounded focus:ring-primary transition-all cursor-pointer"
                     />
-                    <label htmlFor="savedCodes" className="text-sm cursor-pointer select-none">
+                    <label
+                      htmlFor="savedCodes"
+                      className="text-sm cursor-pointer select-none"
+                    >
                       He guardado mis códigos de recuperación
                     </label>
                   </div>
@@ -891,7 +938,8 @@ const AdminPanelContent = () => {
               {mfaSetupStep === 2 && (
                 <div className="space-y-4 flex flex-col items-center">
                   <p className="text-sm text-on-surface-variant text-center">
-                    Escanea este código QR con tu aplicación de autenticación (Google Authenticator, Authy, etc).
+                    Escanea este código QR con tu aplicación de autenticación
+                    (Google Authenticator, Authy, etc).
                   </p>
                   <div className="bg-white p-4 rounded-xl shadow-sm">
                     {qrUri && <QRCodeSVG value={qrUri} size={200} />}
@@ -911,13 +959,18 @@ const AdminPanelContent = () => {
                           setIsMfaDialogOpen(false);
                           setTotpCode("");
                           setMfaSetupStep(0);
-                        }
+                        },
                       });
                     }}
-                    disabled={totpCode.length < 6 || verifyAndEnableMfaMutation.isPending}
+                    disabled={
+                      totpCode.length < 6 ||
+                      verifyAndEnableMfaMutation.isPending
+                    }
                     className="w-full px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-bold text-sm uppercase transition-colors shadow disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {verifyAndEnableMfaMutation.isPending ? "Verificando..." : "Verificar y Activar"}
+                    {verifyAndEnableMfaMutation.isPending
+                      ? "Verificando..."
+                      : "Verificar y Activar"}
                   </button>
                 </div>
               )}
@@ -926,7 +979,12 @@ const AdminPanelContent = () => {
         </Dialog>
 
         {/* Modal de confirmación general para eliminar */}
-        <Dialog open={confirmDialog.isOpen} onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, isOpen: open }))}>
+        <Dialog
+          open={confirmDialog.isOpen}
+          onOpenChange={(open) =>
+            setConfirmDialog((prev) => ({ ...prev, isOpen: open }))
+          }
+        >
           <DialogContent className="sm:max-w-md bg-surface-container-lowest border-outline-variant">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black tracking-tight text-on-surface">
@@ -939,7 +997,9 @@ const AdminPanelContent = () => {
               </p>
               <div className="flex justify-end gap-2 mt-4">
                 <button
-                  onClick={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
+                  onClick={() =>
+                    setConfirmDialog((prev) => ({ ...prev, isOpen: false }))
+                  }
                   className="px-4 py-2 bg-surface-container-high text-on-surface hover:bg-surface-dim rounded-md font-bold text-sm uppercase transition-colors"
                 >
                   Cancelar
@@ -968,7 +1028,7 @@ const AdminPanelContent = () => {
         <h2 className="text-3xl font-black tracking-tight mb-6 text-center text-on-surface uppercase">
           {isMfaRequired ? "Verificación" : "Iniciar Sesión"}
         </h2>
-        
+
         {isMfaRequired ? (
           <form className="space-y-4">
             <p className="text-sm text-center text-on-surface-variant mb-4">
@@ -985,11 +1045,18 @@ const AdminPanelContent = () => {
             />
             <button
               type="button"
-              onClick={() => verifyMfaLoginMutation.mutate({ challengeId: mfaChallengeId, code: totpCode })}
+              onClick={() =>
+                verifyMfaLoginMutation.mutate({
+                  challengeId: mfaChallengeId,
+                  code: totpCode,
+                })
+              }
               disabled={totpCode.length < 6 || verifyMfaLoginMutation.isPending}
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground p-3 rounded-xl font-bold uppercase tracking-wider transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {verifyMfaLoginMutation.isPending ? "Verificando..." : "Verificar Código"}
+              {verifyMfaLoginMutation.isPending
+                ? "Verificando..."
+                : "Verificar Código"}
             </button>
           </form>
         ) : (

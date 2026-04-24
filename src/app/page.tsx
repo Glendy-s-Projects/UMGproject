@@ -3,8 +3,72 @@ import AppLayout from "@/components/AppLayout";
 import { SemesterRoutes } from "@/utils/data/routes";
 import { MdArrowOutward } from "react-icons/md";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { getTopics, getCourses } from "../../lib/appwrite";
+
+const normalizeString = (str: string): string => {
+  return str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "");
+};
 
 export default function Home() {
+  const [routes, setRoutes] = useState(SemesterRoutes);
+
+  useEffect(() => {
+    const fetchDynamicRoutes = async () => {
+      try {
+        const topics = await getTopics();
+        if (topics) {
+          const updatedRoutes = [...SemesterRoutes];
+          const coursesData = await Promise.all(
+            topics.map(async (topic) => {
+              const courses = await getCourses(topic.$id);
+              return { topic, courses };
+            })
+          );
+
+          coursesData.forEach(({ topic, courses }) => {
+            if (courses && courses.length > 0) {
+              const routeIndex = updatedRoutes.findIndex(
+                (r) => r.name.toLowerCase() === topic.semester.toLowerCase()
+              );
+              if (routeIndex !== -1) {
+                const staticSubRoutes = updatedRoutes[routeIndex].routes || [];
+                const dynamicSubRoutes = courses.map((c, idx) => ({
+                  id: staticSubRoutes.length + idx + 1,
+                  name: c.course,
+                  href: `${updatedRoutes[routeIndex].mainroute}/${normalizeString(c.course)}`,
+                  bgColor: "bg-surface-container-lowest",
+                  image: "",
+                }));
+
+                const allSubRoutes = [...staticSubRoutes];
+                dynamicSubRoutes.forEach((dynRoute) => {
+                  if (!allSubRoutes.some((sr) => sr.name.toLowerCase() === dynRoute.name.toLowerCase())) {
+                    allSubRoutes.push(dynRoute);
+                  }
+                });
+
+                updatedRoutes[routeIndex] = {
+                  ...updatedRoutes[routeIndex],
+                  routes: allSubRoutes,
+                };
+              }
+            }
+          });
+
+          setRoutes(updatedRoutes);
+        }
+      } catch (error) {
+        console.error("Error fetching dynamic courses:", error);
+      }
+    };
+    fetchDynamicRoutes();
+  }, []);
+
   return (
     <AppLayout title="Ingenieria en Sistemas">
       <main className="flex-1 px-4 md:px-8 py-8 md:py-12 max-w-screen-xl w-full mx-auto">
@@ -28,7 +92,7 @@ export default function Home() {
         </section>
 
         <section className="grid grid-cols-1 md:grid-cols-3 gap-0 bg-outline-variant/20">
-          {SemesterRoutes.map((route, index) => {
+          {routes.map((route, index) => {
             const bgColors = [
               "bg-surface-container-lowest",
               "bg-surface-container-low",
