@@ -3,6 +3,7 @@ import React from "react";
 import { MdArrowOutward } from "react-icons/md";
 import { Skeleton } from "@/context/components/ui/skeleton";
 import { routetype } from "@/types/index";
+import { BookIcon } from "@phosphor-icons/react/dist/ssr";
 
 const Grids = ({
   mainSemester,
@@ -51,7 +52,7 @@ const Grids = ({
                       <cursos.icon className="text-4xl" />
                     ) : (
                       <span className="material-symbols-outlined text-4xl">
-                        menu_book
+                        <BookIcon />
                       </span>
                     )}
                   </div>
@@ -80,7 +81,13 @@ const Grids = ({
               <div className="bg-surface-container-lowest h-full rounded-[calc(0.75rem-2px)] p-8 flex flex-col">
                 <div className="mb-auto">
                   <div className="w-12 h-12 flex items-center justify-center bg-surface-container-high rounded-full mb-6">
-                    {cursos.icon && <cursos.icon className="text-2xl" />}
+                    {cursos.icon ? (
+                      <cursos.icon className="text-2xl" />
+                    ) : (
+                      <span className="material-symbols-outlined text-2xl">
+                        <BookIcon />
+                      </span>
+                    )}
                   </div>
                   <h2 className="text-3xl font-black tracking-tighter text-black mb-2">
                     {cursos.name}

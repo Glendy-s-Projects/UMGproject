@@ -211,6 +211,25 @@ export const getCourseByName = async (courseName: string) => {
   }
 };
 
+export const getTopicByName = async (semesterName: string) => {
+  try {
+    const topics = await databases.listDocuments(
+      appwriteConfig.databaseId!,
+      appwriteConfig.topicCollectionId!,
+      [Query.equal("semester", semesterName)]
+    );
+
+    if (topics.documents.length === 0) {
+      return null;
+    }
+
+    return topics.documents[0];
+  } catch (error) {
+    console.error("Error fetching topic by name:", error);
+    throw error;
+  }
+};
+
 //-- UPDATE --//
 export const updateTopic = async (topicId: string, newSemesterName: string) => {
   try {

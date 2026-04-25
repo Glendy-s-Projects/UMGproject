@@ -292,6 +292,7 @@ export type routetype = {
   image: string;
   subroutes?: slugstype[];
   icon?: React.ElementType;
+  hasInteractiveTools?: boolean; // Indica si tiene herramientas interactivas
 };
 
 export type SemesterType = {

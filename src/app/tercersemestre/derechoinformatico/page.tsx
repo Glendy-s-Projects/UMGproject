@@ -6,7 +6,7 @@ import { DerechoInformaticoSlugs } from "@/utils/data/routes";
 import React from "react";
 
 const DerechoInformatico = () => {
-  const { videos, files, loading } = useCourseData("Derecho Informatico");
+  const { videos, files, loading } = useCourseData("Derecho Informático");
   return (
     <AppLayout title="Derecho Informatico" activeTopicId="3">
       <MainSemesterLayout

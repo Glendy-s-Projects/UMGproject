@@ -40,6 +40,7 @@ export const SemesterRoutes: SemesterType[] = [
         href: "/segundosemestre/precalculo",
         bgColor: "bg-teal-300",
         image: "/precalculo.webp",
+        hasInteractiveTools: true,
         subroutes: [
           {
             id: 1,
@@ -111,10 +112,11 @@ export const SemesterRoutes: SemesterType[] = [
       },
       {
         id: 3,
-        name: "Algebra Lineal",
+        name: "Álgebra Lineal",
         href: "/segundosemestre/algebralineal",
         bgColor: "bg-green-300",
         image: "/algebra.webp",
+        hasInteractiveTools: true,
         subroutes: [
           {
             id: 1,
@@ -164,6 +166,7 @@ export const SemesterRoutes: SemesterType[] = [
         href: "/segundosemestre/matematicadiscreta",
         bgColor: "bg-amber-300",
         image: "/matematicadiscreta1.webp",
+        hasInteractiveTools: true,
         subroutes: [
           {
             id: 1,
@@ -190,10 +193,11 @@ export const SemesterRoutes: SemesterType[] = [
     routes: [
       {
         id: 1,
-        name: "Fisica 1",
+        name: "Física I",
         href: "/tercersemestre/fisica1",
         bgColor: "bg-blue-300",
         image: "/fisica1.webp",
+        hasInteractiveTools: true,
         subroutes: [
           {
             id: 1,
@@ -215,7 +219,7 @@ export const SemesterRoutes: SemesterType[] = [
       },
       {
         id: 2,
-        name: "Programación 1",
+        name: "Programación I",
         href: "/tercersemestre/programacion1",
         bgColor: "bg-blue-300",
         image: "/programacion1.webp",
@@ -233,10 +237,11 @@ export const SemesterRoutes: SemesterType[] = [
       },
       {
         id: 4,
-        name: "Cálculo 1",
+        name: "Cálculo I",
         href: "/tercersemestre/calculo1",
         bgColor: "bg-blue-300",
         image: "/calculo1.webp",
+        hasInteractiveTools: true,
         subroutes: [
           {
             id: 1,
@@ -248,7 +253,7 @@ export const SemesterRoutes: SemesterType[] = [
       },
       {
         id: 5,
-        name: "Derecho Informativo",
+        name: "Derecho Informático",
         href: "/tercersemestre/derechoinformatico",
         bgColor: "bg-blue-300",
         image: "/derechoinformatico.webp",
