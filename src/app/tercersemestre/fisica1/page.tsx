@@ -6,7 +6,7 @@ import { Fisica1Slugs } from "@/utils/data/routes";
 import React from "react";
 
 const Fisica1 = () => {
-  const { videos, files, loading } = useCourseData("Fisica 1");
+  const { videos, files, loading } = useCourseData("Física I");
   return (
     <AppLayout title="Física 1" activeTopicId="3">
       <MainSemesterLayout
