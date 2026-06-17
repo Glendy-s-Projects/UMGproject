@@ -27,6 +27,8 @@ import Image from "next/image";
 import Link from "next/link";
 import CursosAdmin from "./cursos";
 import { TopicData, AppwriteMfaError } from "../types";
+import { MFALogin } from "./mfalogin";
+import Mainsection from "./mainsection";
 
 // Definimos la estructura de los datos que vienen de la base de datos
 
@@ -209,89 +211,19 @@ const AdminPanelContent = () => {
         }
       >
         <main className="flex-1 px-4 md:px-8 py-8 md:py-12 max-w-screen-xl w-full mx-auto">
-          <section className=" flex flex-col items-start gap-6">
-            <div className="w-full flex justify-between items-end border-b-2 border-outline-variant/30 pb-2">
-              <div className="space-y-1 w-full max-w-3xl ">
-                {activeTopic && editingTopicId === activeTopic.$id ? (
-                  <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 w-full">
-                    <input
-                      type="text"
-                      value={editTopicName}
-                      onChange={(e) => setEditTopicName(e.target.value)}
-                      className="w-full text-[2.5rem] md:text-[3.5rem] font-black leading-[0.9] tracking-tighter text-on-surface bg-transparent border-b-4 border-primary focus:outline-none"
-                      autoFocus
-                    />
-                    <div className="flex gap-2 pb-1">
-                      <button
-                        onClick={() =>
-                          updateTopicMutation.mutate({
-                            topicId: activeTopic.$id,
-                            newSemesterName: editTopicName,
-                          })
-                        }
-                        disabled={updateTopicMutation.isPending}
-                        className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded font-bold text-sm uppercase transition-colors"
-                      >
-                        {updateTopicMutation.isPending
-                          ? "Guardando..."
-                          : "Guardar"}
-                      </button>
-                      <button
-                        onClick={() => setEditingTopicId(null)}
-                        className="bg-surface-container-highest hover:bg-surface-dim text-on-surface px-4 py-2 rounded font-bold text-sm uppercase transition-colors"
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <h1 className="text-[2.5rem] pb-6 font-black leading-[0.9] tracking-tighter text-on-surface">
-                    {activeTopic?.semester || "Seleccionar Semestre"}
-                  </h1>
-                )}
-              </div>
-              {!editingTopicId && activeTopic && (
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => {
-                      setEditingTopicId(activeTopic.$id);
-                      setEditTopicName(activeTopic.semester);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-surface-container-high hover:bg-surface-dim transition-colors text-on-surface text-sm font-bold uppercase tracking-wider rounded-md"
-                  >
-                    <span className="material-symbols-outlined text-sm">
-                      <FaEdit />
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => setIsCourseDialogOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 transition-colors text-white text-sm font-bold uppercase tracking-wider rounded-md"
-                    title="Agregar Nuevo Curso"
-                  >
-                    <IoIosAdd size={20} />
-                  </button>
-                  <button
-                    onClick={() => {
-                      confirmAction(
-                        "Eliminar Semestre",
-                        "¿Estás seguro de que deseas eliminar este semestre por completo? Esta acción no se puede deshacer y borrará todos los cursos dentro de él.",
-                        () => {
-                          deleteTopicMutation.mutate(activeTopic.$id, {
-                            onSuccess: () => router.replace("/admin"),
-                          });
-                        },
-                      );
-                    }}
-                    disabled={deleteTopicMutation.isPending}
-                    className="flex items-center gap-2 px-4 py-2 bg-destructive hover:bg-destructive/90 transition-colors text-destructive-foreground text-sm font-bold uppercase tracking-wider rounded-md"
-                    title="Eliminar Semestre"
-                  >
-                    <MdDeleteOutline size={20} />
-                  </button>
-                </div>
-              )}
-            </div>
-          </section>
+          <Mainsection
+            activeTopic={activeTopic}
+            topics={topics}
+            editingTopicId={editingTopicId}
+            setEditingTopicId={setEditingTopicId}
+            editTopicName={editTopicName}
+            setEditTopicName={setEditTopicName}
+            updateTopicMutation={updateTopicMutation}
+            deleteTopicMutation={deleteTopicMutation}
+            confirmAction={confirmAction}
+            setIsCourseDialogOpen={setIsCourseDialogOpen}
+            router={router}
+          />
           <CursosAdmin
             activeTopic={activeTopic || null}
             topics={topics}
@@ -630,106 +562,22 @@ const AdminPanelContent = () => {
 
   // Si no hay usuario, mostrar formulario de login o MFA
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background text-foreground px-4">
-      <div className="bg-surface-container-lowest border border-outline-variant p-8 rounded-2xl shadow-sm w-full max-w-md">
-        <h2 className="text-3xl font-black tracking-tight mb-6 text-center text-on-surface uppercase">
-          {isMfaRequired ? "Verificación" : "Iniciar Sesión"}
-        </h2>
-
-        {isMfaRequired ? (
-          <form className="space-y-4">
-            <p className="text-sm text-center text-on-surface-variant mb-4">
-              Ingresa el código de 6 dígitos de tu aplicación de autenticación.
-            </p>
-            <input
-              type="text"
-              placeholder="000000"
-              value={totpCode}
-              onChange={(e) => setTotpCode(e.target.value)}
-              maxLength={6}
-              className="w-full p-3 text-center text-2xl tracking-widest border border-outline-variant bg-surface-container-lowest text-on-surface rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-              autoFocus
-            />
-            <button
-              type="button"
-              onClick={() =>
-                verifyMfaLoginMutation.mutate({
-                  challengeId: mfaChallengeId,
-                  code: totpCode,
-                })
-              }
-              disabled={totpCode.length < 6 || verifyMfaLoginMutation.isPending}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground p-3 rounded-xl font-bold uppercase tracking-wider transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {verifyMfaLoginMutation.isPending
-                ? "Verificando..."
-                : "Verificar Código"}
-            </button>
-          </form>
-        ) : (
-          <form className="space-y-4">
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 border border-outline-variant bg-surface-container-lowest text-on-surface rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-            />
-            <div className="relative w-full">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Contraseña"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-3 pr-12 border border-outline-variant bg-surface-container-lowest text-on-surface rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors focus:outline-none flex items-center justify-center"
-              >
-                {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
-              </button>
-            </div>
-            <div className="flex items-center space-x-2 px-1">
-              <input
-                type="checkbox"
-                id="rememberMe"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 text-primary bg-surface-container-lowest border-outline-variant rounded focus:ring-primary transition-all cursor-pointer"
-              />
-              <label
-                htmlFor="rememberMe"
-                className="text-sm text-on-surface-variant font-medium cursor-pointer select-none"
-              >
-                Recordar mis datos
-              </label>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                if (rememberMe) {
-                  localStorage.setItem(
-                    "adminCreds",
-                    JSON.stringify({
-                      savedEmail: email,
-                      savedPassword: password,
-                    }),
-                  );
-                } else {
-                  localStorage.removeItem("adminCreds");
-                }
-                loginMutation.mutate();
-              }}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground p-3 rounded-xl font-bold uppercase tracking-wider transition-colors shadow-sm"
-            >
-              {loginMutation.isPending ? "Iniciando..." : "Iniciar Sesion"}
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
+    <MFALogin
+      isMfaRequired={isMfaRequired}
+      mfaChallengeId={mfaChallengeId}
+      totpCode={totpCode}
+      setTotpCode={setTotpCode}
+      verifyMfaLoginMutation={verifyMfaLoginMutation}
+      loginMutation={loginMutation}
+      email={email}
+      setEmail={setEmail}
+      password={password}
+      setPassword={setPassword}
+      showPassword={showPassword}
+      setShowPassword={setShowPassword}
+      rememberMe={rememberMe}
+      setRememberMe={setRememberMe}
+    />
   );
 };
 
