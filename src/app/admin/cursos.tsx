@@ -13,6 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAdmin } from "../../../lib/useAdmin";
 import { useSearchParams } from "next/navigation";
+import { UseMutationResult } from "@tanstack/react-query";
 
 interface CursosAdminProps {
   topics: TopicData[];
@@ -20,8 +21,8 @@ interface CursosAdminProps {
   setEditingCourseId: React.Dispatch<React.SetStateAction<string | null>>;
   editCourseName: string;
   setEditCourseName: React.Dispatch<React.SetStateAction<string>>;
-  updateCourseMutation: any;
-  deleteCourseMutation: any;
+  updateCourseMutation: UseMutationResult<unknown, Error, { courseId: string; newCourseName: string }, unknown>;
+  deleteCourseMutation: UseMutationResult<unknown, Error, string, unknown>;
   activeVideoCourseId: string | null;
   setActiveVideoCourseId: React.Dispatch<React.SetStateAction<string | null>>;
   activeFileCourseId: string | null;
@@ -29,33 +30,33 @@ interface CursosAdminProps {
   setEditingTopicId: React.Dispatch<React.SetStateAction<string | null>>;
   editTopicName: string;
   setEditTopicName: React.Dispatch<React.SetStateAction<string>>;
-  updateTopicMutation: any;
-  deleteTopicMutation: any;
+  updateTopicMutation: UseMutationResult<unknown, Error, { topicId: string; newSemesterName: string }, unknown>;
+  deleteTopicMutation: UseMutationResult<unknown, Error, string, unknown>;
   confirmAction: (
     title: string,
     description: string,
     action: () => void,
   ) => void;
   handleCreateVideo: (e: React.FormEvent, courseId: string) => void;
-  createVideoMutation: any;
+  createVideoMutation: UseMutationResult<unknown, Error, string, unknown>;
   editingVideoId: string | null;
   setEditingVideoId: React.Dispatch<React.SetStateAction<string | null>>;
   editVideoName: string;
   setEditVideoName: React.Dispatch<React.SetStateAction<string>>;
   editYoutubeCode: string;
   setEditYoutubeCode: React.Dispatch<React.SetStateAction<string>>;
-  updateVideoMutation: any;
-  deleteVideoMutation: any;
+  updateVideoMutation: UseMutationResult<unknown, Error, { videoId: string; newVideoName: string; newYoutubeCode: string }, unknown>;
+  deleteVideoMutation: UseMutationResult<unknown, Error, string, unknown>;
   handleCreateFile: (e: React.FormEvent, courseId: string) => void;
-  createFileMutation: any;
+  createFileMutation: UseMutationResult<unknown, Error, string, unknown>;
   editingFileId: string | null;
   setEditingFileId: React.Dispatch<React.SetStateAction<string | null>>;
   editFileName: string;
   setEditFileName: React.Dispatch<React.SetStateAction<string>>;
   editFileRoute: string;
   setEditFileRoute: React.Dispatch<React.SetStateAction<string>>;
-  updateFileMutation: any;
-  deleteFileMutation: any;
+  updateFileMutation: UseMutationResult<unknown, Error, { fileId: string; newFileName: string; newFileRoute: string }, unknown>;
+  deleteFileMutation: UseMutationResult<unknown, Error, string, unknown>;
   videoName: string;
   setVideoName: React.Dispatch<React.SetStateAction<string>>;
   youtubeCode: string;

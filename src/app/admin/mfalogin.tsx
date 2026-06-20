@@ -1,12 +1,14 @@
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
+import { UseMutationResult } from "@tanstack/react-query";
+import { Models } from "appwrite";
 
 interface MFALoginProps {
   isMfaRequired: boolean;
   mfaChallengeId: string;
   totpCode: string;
   setTotpCode: React.Dispatch<React.SetStateAction<string>>;
-  verifyMfaLoginMutation: any;
-  loginMutation: any;
+  verifyMfaLoginMutation: UseMutationResult<Models.User<Models.Preferences>, Error, { challengeId: string; code: string }, unknown>;
+  loginMutation: UseMutationResult<Models.User<Models.Preferences>, unknown, void, unknown>;
   email: string;
   setEmail: React.Dispatch<React.SetStateAction<string>>;
   password: string;
