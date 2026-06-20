@@ -5,6 +5,7 @@ import { MdDeleteOutline } from "react-icons/md";
 import { TopicData } from "../types";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { UseMutationResult } from "@tanstack/react-query";
+import { Models } from "appwrite";
 
 interface MainSectionProps {
   activeTopic: TopicData | undefined;
@@ -13,8 +14,8 @@ interface MainSectionProps {
   setEditingTopicId: React.Dispatch<React.SetStateAction<string | null>>;
   editTopicName: string;
   setEditTopicName: React.Dispatch<React.SetStateAction<string>>;
-  updateTopicMutation: UseMutationResult<any, Error, { topicId: string; newSemesterName: string }, unknown>;
-  deleteTopicMutation: UseMutationResult<any, Error, string, unknown>;
+  updateTopicMutation: UseMutationResult<Models.Document, Error, { topicId: string; newSemesterName: string }, unknown>;
+  deleteTopicMutation: UseMutationResult<Record<string, never>, Error, string, unknown>;
   confirmAction: (title: string, description: string, action: () => void) => void;
   setIsCourseDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   router: AppRouterInstance;
