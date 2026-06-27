@@ -12,6 +12,7 @@ import {
   BreadcrumbSeparator,
 } from "@/context/components/ui/breadcrumb";
 import { SemesterRoutes } from "@/utils/data/routes";
+import { getTopics } from "../../lib/appwrite";
 
 type BreadcrumbEntry = { label: string; href: string };
 
@@ -49,6 +50,7 @@ const AppLayout = ({
   const [activeTopicId, setActiveTopicId] = useState<string | null>(
     initialActiveId,
   );
+  const [fetchedTopics, setFetchedTopics] = useState<TopicData[] | null>(null);
 
   useEffect(() => {
     if (initialActiveId !== undefined) {
@@ -56,12 +58,31 @@ const AppLayout = ({
     }
   }, [initialActiveId]);
 
+  useEffect(() => {
+    if (!customTopics) {
+      const loadTopics = async () => {
+        try {
+          const topics = await getTopics();
+          if (topics) {
+            const typedTopics = topics as unknown as Array<{ $id: string; semester: string }>;
+            setFetchedTopics(
+              typedTopics.map((t) => ({ $id: t.$id, semester: t.semester }))
+            );
+          }
+        } catch (error) {
+          console.error("Error cargando topics en AppLayout", error);
+        }
+      };
+      loadTopics();
+    }
+  }, [customTopics]);
+
   const staticTopics = SemesterRoutes.map((route) => ({
     $id: route.id.toString(),
     semester: route.name,
   }));
 
-  const topicsToUse = customTopics || staticTopics;
+  const topicsToUse = customTopics || fetchedTopics || staticTopics;
 
   const handleTopicSelect = (id: string) => {
     if (onTopicSelectOverride) {
@@ -69,8 +90,25 @@ const AppLayout = ({
       return;
     }
     setActiveTopicId(id);
-    const topic = SemesterRoutes.find((r) => r.id.toString() === id);
-    if (topic) router.push(topic.mainroute);
+    
+    // Primero buscar en rutas estáticas
+    const staticTopic = SemesterRoutes.find((r) => r.id.toString() === id);
+    if (staticTopic) {
+      router.push(staticTopic.mainroute);
+      return;
+    }
+
+    // Si es un topic dinámico, calcular su ruta
+    const dynamicTopic = topicsToUse.find((t) => t.$id === id);
+    if (dynamicTopic) {
+      const normalizeString = (str: string) =>
+        str
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/\s+/g, "");
+      router.push(`/${normalizeString(dynamicTopic.semester)}`);
+    }
   };
 
   // Generar breadcrumbs automáticamente desde la ruta si no se proporcionan

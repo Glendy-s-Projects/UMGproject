@@ -104,6 +104,7 @@ export const getTopics = async () => {
       appwriteConfig.topicCollectionId!,
       [Query.limit(100)]
     );
+    console.log("Topics fetched:", topics);
 
     if (topics.documents.length > 0) {
       return topics.documents;

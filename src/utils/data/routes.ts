@@ -265,6 +265,15 @@ export const SemesterRoutes: SemesterType[] = [
     bgColor: "#fca5a5",
     acronym: "3er",
   },
+  {
+    id:4,
+    name: "Cuarto Semestre",
+    mainroute: "/cuartosemestre",
+    routes: [],
+    image: "/4.webp",
+    bgColor: "#a78bfa",
+    acronym: "4to",
+  }
 ];
 
 // Función para obtener todos los cursos de un semestre específico por su ID
@@ -301,3 +310,4 @@ export const DerechoInformaticoSlugs = getTemasByCursoId(3, 5); // Semestre 3, C
 export const PrimerSemestreCursos = getCursosBySemestreId(1); // ID 2 = Segundo Semestre
 export const SegundoSemestreCursos = getCursosBySemestreId(2); // ID 2 = Segundo Semestre
 export const TercerSemestreCursos = getCursosBySemestreId(3); // ID 3 = Tercer Semestre
+export const CuartoSemestreCursos = getCursosBySemestreId(4); // ID 3 = Tercer Semestre
