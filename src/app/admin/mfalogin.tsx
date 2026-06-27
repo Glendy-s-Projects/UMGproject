@@ -36,7 +36,7 @@ export const MFALogin = ({
   setRememberMe,
 }: MFALoginProps) => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background text-foreground px-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-background text-foreground px-4">
       <div className="bg-surface-container-lowest border border-outline-variant p-8 rounded-2xl shadow-sm w-full max-w-md">
         <h2 className="text-3xl font-black tracking-tight mb-6 text-center text-on-surface uppercase">
           {isMfaRequired ? "Verificación" : "Iniciar Sesión"}
@@ -73,7 +73,7 @@ export const MFALogin = ({
             </button>
           </form>
         ) : (
-          <form className="space-y-4">
+          <form className="w-full flex flex-col gap-2 items-center justify-center">
             <input
               type="email"
               placeholder="Email"

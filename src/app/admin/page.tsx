@@ -2,29 +2,16 @@
 import { useEffect, Suspense, useState } from "react";
 import { useAdmin } from "../../../lib/useAdmin";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FaEdit, FaEye, FaEyeSlash } from "react-icons/fa";
-import { RxVideo } from "react-icons/rx";
-import { IoIosAdd } from "react-icons/io";
-import { MdOutlineUploadFile } from "react-icons/md";
-import { MdDeleteOutline } from "react-icons/md";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/context/components/ui/collapsible";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/context/components/ui/dialog";
-import { IoIosArrowDown } from "react-icons/io";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AppLayout from "@/components/AppLayout";
 import { QRCodeSVG } from "qrcode.react";
-import Image from "next/image";
-import Link from "next/link";
 import CursosAdmin from "./cursos";
 import { TopicData, AppwriteMfaError } from "../types";
 import { MFALogin } from "./mfalogin";
@@ -42,8 +29,6 @@ const AdminPanelContent = () => {
     setEmail,
     password,
     setPassword,
-    name,
-    setName,
     videoName,
     setVideoName,
     youtubeCode,
@@ -55,9 +40,6 @@ const AdminPanelContent = () => {
     user,
     isUserLoading,
     topics,
-    courses,
-    files,
-    videos,
     loginMutation,
     logoutMutation,
     isMfaRequired,
@@ -76,7 +58,6 @@ const AdminPanelContent = () => {
     createCourseMutation,
     courseName,
     setCourseName,
-    handleCreateCourse,
     createVideoMutation,
     createFileMutation,
     handleCreateVideo,
