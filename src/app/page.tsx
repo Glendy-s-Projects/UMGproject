@@ -1,10 +1,12 @@
-"use client";
+//"use client";
 import AppLayout from "@/components/AppLayout";
 import { SemesterRoutes } from "@/utils/data/routes";
 import { MdArrowOutward } from "react-icons/md";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { getTopics, getCourses } from "../../lib/appwrite";
+import { getCourses, getTopics } from "../../lib/appwrite-server";
+//import { useEffect, useState } from "react";
+
+export const dynamic = 'force-dynamic';
 
 const normalizeString = (str: string): string => {
   return str
@@ -14,63 +16,78 @@ const normalizeString = (str: string): string => {
     .replace(/\s+/g, "");
 };
 
-export default function Home() {
-  const [routes, setRoutes] = useState(SemesterRoutes);
+async function buildRoutes() {
+  const topics = await getTopics();
+  if (!topics) return SemesterRoutes;
 
-  useEffect(() => {
-    const fetchDynamicRoutes = async () => {
-      try {
-        const topics = await getTopics();
-        if (topics) {
-          const updatedRoutes = [...SemesterRoutes];
-          const coursesData = await Promise.all(
-            topics.map(async (topic) => {
-              const courses = await getCourses(topic.$id);
-              return { topic, courses };
-            })
-          );
+  const updatedRoutes = [...SemesterRoutes];
+  const coursesData = await Promise.all(
+    topics.map(async (topic) => ({
+      topic,
+      courses: await getCourses(topic.$id),
+    })),
+  );
 
-          coursesData.forEach(({ topic, courses }) => {
-            if (courses && courses.length > 0) {
-              const routeIndex = updatedRoutes.findIndex(
-                (r) => r.name.toLowerCase() === topic.semester.toLowerCase()
-              );
-              if (routeIndex !== -1) {
-                const staticSubRoutes = updatedRoutes[routeIndex].routes || [];
-                const dynamicSubRoutes = courses.map((c, idx) => ({
-                  id: staticSubRoutes.length + idx + 1,
-                  name: c.course,
-                  href: `${updatedRoutes[routeIndex].mainroute}/${normalizeString(c.course)}`,
-                  bgColor: "bg-surface-container-lowest",
-                  image: "",
-                }));
+  coursesData.forEach(({ topic, courses }) => {
+    let routeIndex = updatedRoutes.findIndex(
+      (r) => r.name.toLowerCase() === topic.semester.toLowerCase(),
+    );
 
-                const allSubRoutes = [...staticSubRoutes];
-                dynamicSubRoutes.forEach((dynRoute) => {
-                  if (!allSubRoutes.some((sr) => sr.name.toLowerCase() === dynRoute.name.toLowerCase())) {
-                    allSubRoutes.push(dynRoute);
-                  }
-                });
+    // Si el semestre no existe en los estáticos, lo creamos de forma dinámica
+    if (routeIndex === -1) {
+      const newSemester = {
+        id: updatedRoutes.length > 0 ? Math.max(...updatedRoutes.map((r) => r.id)) + 1 : 1,
+        name: topic.semester,
+        mainroute: `/${normalizeString(topic.semester)}`,
+        routes: [],
+        bgColor: "#e5e7eb", // color por defecto
+        image: "",
+        acronym: topic.semester.substring(0, 3).toUpperCase(),
+      };
+      updatedRoutes.push(newSemester);
+      routeIndex = updatedRoutes.length - 1;
+    }
 
-                updatedRoutes[routeIndex] = {
-                  ...updatedRoutes[routeIndex],
-                  routes: allSubRoutes,
-                };
-              }
-            }
-          });
+    const staticSubRoutes = updatedRoutes[routeIndex].routes || [];
+    const typedCourses = (courses as unknown as Array<{ course: string }>) || [];
+    const dynamicSubRoutes = typedCourses.map((c, idx: number) => ({
+      id: staticSubRoutes.length + idx + 1,
+      name: c.course,
+      href: `${updatedRoutes[routeIndex].mainroute}/${normalizeString(c.course)}`,
+      bgColor: "bg-surface-container-lowest",
+      image: "",
+    }));
 
-          setRoutes(updatedRoutes);
-        }
-      } catch (error) {
-        console.error("Error fetching dynamic courses:", error);
+    const allSubRoutes = [...staticSubRoutes];
+    dynamicSubRoutes.forEach((dynRoute) => {
+      if (
+        !allSubRoutes.some(
+          (sr) => sr.name.toLowerCase() === dynRoute.name.toLowerCase(),
+        )
+      ) {
+        allSubRoutes.push(dynRoute);
       }
+    });
+
+    updatedRoutes[routeIndex] = {
+      ...updatedRoutes[routeIndex],
+      routes: allSubRoutes,
     };
-    fetchDynamicRoutes();
-  }, []);
+  });
+
+  return updatedRoutes;
+}
+
+export default async function Home() {
+  const routes = await buildRoutes(); // fetch ocurre en el servidor
+
+  const customTopics = routes.map((route) => ({
+    $id: route.id.toString(),
+    semester: route.name,
+  }));
 
   return (
-    <AppLayout title="Ingenieria en Sistemas">
+    <AppLayout title="Ingenieria en Sistemas" customTopics={customTopics}>
       <main className="flex-1 px-4 md:px-8 py-8 md:py-12 max-w-screen-xl w-full mx-auto">
         <section className="mb-20">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -101,12 +118,10 @@ export default function Home() {
             ];
             const bgColorClass = bgColors[index % bgColors.length];
 
-            return (
-              <Link
-                className={`group ${bgColorClass} border-r border-black/5 hover:bg-black hover:text-white transition-colors duration-300 p-10 flex flex-col h-[500px] relative overflow-hidden`}
-                key={route.id}
-                href={route.mainroute}
-              >
+            const hasCourses = route.routes && route.routes.length > 0;
+
+            const cardContent = (
+              <>
                 <div className="flex justify-between items-start mb-12">
                   <span className="text-[10px] font-bold tracking-[0.3em] uppercase"></span>
                   <span className="material-symbols-outlined opacity-30 group-hover:opacity-100 transition-opacity">
@@ -122,13 +137,38 @@ export default function Home() {
                       {route.name}
                     </h2>
 
-                    <ul className="text-[11px] font-bold tracking-widest space-y-2 opacity-60 group-hover:opacity-100 transition-opacity uppercase">
-                      {route.routes.map((route) => (
-                        <li key={route.id}>- {route.name}</li>
-                      ))}
-                    </ul>
+                    {hasCourses ? (
+                      <ul className="text-[11px] font-bold tracking-widest space-y-2 opacity-60 group-hover:opacity-100 transition-opacity uppercase">
+                        {route.routes.map((route) => (
+                          <li key={route.id}>- {route.name}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <span className="text-sm font-bold opacity-50 uppercase">No hay cursos aún</span>
+                    )}
                   </div>
                 </div>
+              </>
+            );
+
+            if (!hasCourses) {
+              return (
+                <div
+                  className={`group ${bgColorClass} border-r border-black/5 p-10 flex flex-col h-[500px] relative overflow-hidden opacity-50 cursor-not-allowed`}
+                  key={route.id}
+                >
+                  {cardContent}
+                </div>
+              );
+            }
+
+            return (
+              <Link
+                className={`group ${bgColorClass} border-r border-black/5 hover:bg-black hover:text-white transition-colors duration-300 p-10 flex flex-col h-[500px] relative overflow-hidden`}
+                key={route.id}
+                href={route.mainroute}
+              >
+                {cardContent}
               </Link>
             );
           })}
