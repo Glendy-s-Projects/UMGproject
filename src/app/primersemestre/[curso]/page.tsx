@@ -1,11 +1,7 @@
-"use client";
-
-import AppLayout from "@/components/AppLayout";
-import MainSemesterLayout from "@/components/MainSemesterLayout";
-import useCourseData from "@/hooks/useCourseData";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import AppLayout from "../../../components/AppLayout";
 import { getTopicByName, getCourses } from "../../../../lib/appwrite";
+import CourseContent from "./CourseContent";
+
 
 const normalizeString = (str: string): string => {
   return str
@@ -15,50 +11,28 @@ const normalizeString = (str: string): string => {
     .replace(/\s+/g, "");
 };
 
-const DynamicCourse = () => {
-  const params = useParams();
-  const cursoSlug = params.curso as string;
-  const [courseName, setCourseName] = useState<string | null>(null);
-  const [loadingCourseName, setLoadingCourseName] = useState(true);
+interface PageProps {
+  params: { curso: string };
+}
 
-  useEffect(() => {
-    const fetchCourseName = async () => {
-      try {
-        const topic = await getTopicByName("Primer Semestre");
-        if (!topic) {
-          setCourseName(null);
-          setLoadingCourseName(false);
-          return;
-        }
+export default async function DynamicCoursePage({ params }: PageProps) {
+  const cursoSlug = params.curso;
+  let courseName: string | null = null;
 
-        const courses = await getCourses(topic.$id);
-        if (courses) {
-          const normalizedSlug = normalizeString(cursoSlug);
-          const course = courses.find(
-            (c) => normalizeString(c.course) === normalizedSlug,
-          );
-          setCourseName(course ? course.course : null);
-        }
-      } catch (error) {
-        console.error("Error finding course:", error);
-        setCourseName(null);
-      } finally {
-        setLoadingCourseName(false);
+  try {
+    const topic = await getTopicByName("Primer Semestre");
+    if (topic) {
+      const courses = await getCourses(topic.$id);
+      if (courses) {
+        const normalizedSlug = normalizeString(cursoSlug);
+        const course = courses.find(
+          (c) => normalizeString(c.course) === normalizedSlug
+        );
+        courseName = course ? course.course : null;
       }
-    };
-    fetchCourseName();
-  }, [cursoSlug]);
-
-  const { videos, files, loading } = useCourseData(courseName || "");
-
-  if (loadingCourseName) {
-    return (
-      <AppLayout title="Cargando..." activeTopicId="1">
-        <div className="flex items-center justify-center min-h-screen">
-          <p>Cargando curso...</p>
-        </div>
-      </AppLayout>
-    );
+    }
+  } catch (error) {
+    console.error("Error finding course:", error);
   }
 
   if (!courseName) {
@@ -73,15 +47,7 @@ const DynamicCourse = () => {
 
   return (
     <AppLayout title={courseName} activeTopicId="1">
-      <MainSemesterLayout
-        title={courseName}
-        slugs={[]}
-        videos={videos}
-        files={files}
-        loading={loading}
-      />
+      <CourseContent courseName={courseName} />
     </AppLayout>
   );
-};
-
-export default DynamicCourse;
+}

@@ -1,11 +1,6 @@
-"use client";
-
 import AppLayout from "@/components/AppLayout";
-import MainSemesterLayout from "@/components/MainSemesterLayout";
-import useCourseData from "@/hooks/useCourseData";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
 import { getTopicByName, getCourses, getTopics } from "../../../../lib/appwrite";
+import CourseContent from "@/components/CourseContent";
 
 const normalizeString = (str: string): string => {
   return str
@@ -15,69 +10,43 @@ const normalizeString = (str: string): string => {
     .replace(/\s+/g, "");
 };
 
-const DynamicCourse = () => {
-  const params = useParams();
-  const cursoSlug = params.curso as string;
-  const [courseName, setCourseName] = useState<string | null>(null);
-  const [topicId, setTopicId] = useState<string | null>(null);
-  const [loadingCourseName, setLoadingCourseName] = useState(true);
-  const [allTopics, setAllTopics] = useState<{ $id: string; semester: string }[]>([]);
+interface PageProps {
+  params: { curso: string };
+}
 
-  useEffect(() => {
-    const fetchCourseName = async () => {
-      try {
-        const topics = await getTopics();
-        if (topics) {
-          const typedTopics = topics as unknown as Array<{ $id: string; semester: string }>;
-          setAllTopics(typedTopics.map(t => ({ $id: t.$id, semester: t.semester })));
-        }
-        
-        const topic = await getTopicByName("Cuarto Semestre");
-        if (!topic) {
-          setCourseName(null);
-          setLoadingCourseName(false);
-          return;
-        }
+export default async function DynamicCoursePage({ params }: PageProps) {
+  const cursoSlug = params.curso;
+  let courseName: string | null = null;
+  let topicId: string | null = null;
+  let allTopics: { $id: string; semester: string }[] = [];
 
-        setTopicId(topic.$id);
-        const courses = await getCourses(topic.$id);
-        if (courses) {
-          const normalizedSlug = normalizeString(cursoSlug);
-          const course = courses.find(
-            (c) => normalizeString(c.course) === normalizedSlug,
-          );
-          setCourseName(course ? course.course : null);
-        }
-      } catch (error) {
-        console.error("Error finding course:", error);
-        setCourseName(null);
-      } finally {
-        setLoadingCourseName(false);
+  try {
+    const topics = await getTopics();
+    if (topics) {
+      allTopics = topics.map((t: any) => ({ $id: t.$id, semester: t.semester }));
+    }
+
+    const topic = await getTopicByName("Cuarto Semestre");
+    if (topic) {
+      topicId = topic.$id;
+      const courses = await getCourses(topic.$id);
+      if (courses) {
+        const normalizedSlug = normalizeString(cursoSlug);
+        const course = courses.find(
+          (c: any) => normalizeString(c.course) === normalizedSlug
+        );
+        courseName = course ? course.course : null;
       }
-    };
-    fetchCourseName();
-  }, [cursoSlug]);
-
-  const { videos, files, loading } = useCourseData(courseName || "");
-
-  const customTopics = allTopics.length > 0 ? allTopics.map(t => ({
-    $id: t.$id,
-    semester: t.semester
-  })) : undefined;
-
-  if (loadingCourseName) {
-    return (
-      <AppLayout title="Cargando..." activeTopicId={topicId} customTopics={customTopics}>
-        <div className="flex items-center justify-center min-h-screen">
-          <p>Cargando curso...</p>
-        </div>
-      </AppLayout>
-    );
+    }
+  } catch (error) {
+    console.error("Error finding course:", error);
   }
+
+  const customTopics = allTopics.length > 0 ? allTopics : undefined;
 
   if (!courseName) {
     return (
-      <AppLayout title="Curso no encontrado" activeTopicId={topicId} customTopics={customTopics}>
+      <AppLayout title="Curso no encontrado" activeTopicId={topicId || "4"} customTopics={customTopics}>
         <div className="flex items-center justify-center min-h-screen">
           <p>Curso no encontrado</p>
         </div>
@@ -86,16 +55,8 @@ const DynamicCourse = () => {
   }
 
   return (
-    <AppLayout title={courseName} activeTopicId={topicId} customTopics={customTopics}>
-      <MainSemesterLayout
-        title={courseName}
-        slugs={[]}
-        videos={videos}
-        files={files}
-        loading={loading}
-      />
+    <AppLayout title={courseName} activeTopicId={topicId || "4"} customTopics={customTopics}>
+      <CourseContent courseName={courseName} />
     </AppLayout>
   );
-};
-
-export default DynamicCourse;
+}
