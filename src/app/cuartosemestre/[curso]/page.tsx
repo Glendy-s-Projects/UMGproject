@@ -1,6 +1,6 @@
 import AppLayout from "@/components/AppLayout";
 import { getTopicByName, getCourses, getTopics } from "../../../../lib/appwrite";
-import CourseContent from "@/components/CourseContent";
+import CourseContent from "@/app/primersemestre/[curso]/CourseContent";
 
 const normalizeString = (str: string): string => {
   return str
