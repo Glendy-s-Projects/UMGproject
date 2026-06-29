@@ -1,6 +1,7 @@
 import AppLayout from "@/components/AppLayout";
 import { getTopicByName, getCourses, getTopics } from "../../../../lib/appwrite";
 import CourseContent from "@/app/primersemestre/[curso]/CourseContent";
+import { Models } from "appwrite";
 
 const normalizeString = (str: string): string => {
   return str
@@ -14,6 +15,14 @@ interface PageProps {
   params: { curso: string };
 }
 
+interface Topic extends Models.Document {
+  semester: string;
+}
+
+interface Course extends Models.Document {
+  course: string;
+}
+
 export default async function DynamicCoursePage({ params }: PageProps) {
   const cursoSlug = params.curso;
   let courseName: string | null = null;
@@ -23,7 +32,7 @@ export default async function DynamicCoursePage({ params }: PageProps) {
   try {
     const topics = await getTopics();
     if (topics) {
-      allTopics = topics.map((t: any) => ({ $id: t.$id, semester: t.semester }));
+      allTopics = (topics as unknown as Topic[]).map((t) => ({ $id: t.$id, semester: t.semester }));
     }
 
     const topic = await getTopicByName("Cuarto Semestre");
@@ -32,8 +41,8 @@ export default async function DynamicCoursePage({ params }: PageProps) {
       const courses = await getCourses(topic.$id);
       if (courses) {
         const normalizedSlug = normalizeString(cursoSlug);
-        const course = courses.find(
-          (c: any) => normalizeString(c.course) === normalizedSlug
+        const course = (courses as unknown as Course[]).find(
+          (c) => normalizeString(c.course) === normalizedSlug
         );
         courseName = course ? course.course : null;
       }

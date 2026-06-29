@@ -4,6 +4,15 @@ import TitleCourse from "@/components/TitleCourse";
 import { getTopics, getCourses } from "../../../lib/appwrite-server";
 import { routetype } from "@/types/index";
 import React from "react";
+import { Models } from "node-appwrite";
+
+interface AppwriteTopic extends Models.Document {
+  semester: string;
+}
+
+interface AppwriteCourse extends Models.Document {
+  course: string;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -22,13 +31,13 @@ export default async function CuartoSemestre() {
   let topicId = "4";
 
   if (topics) {
-    const topic = topics.find((t) => normalizeString(t.semester) === normalizeString("Cuarto Semestre"));
+    const topic = (topics as unknown as AppwriteTopic[]).find((t) => normalizeString(t.semester) === normalizeString("Cuarto Semestre"));
     if (topic) {
       topicId = topic.$id;
       const rawCourses = await getCourses(topic.$id);
       
       if (rawCourses) {
-        coursesList = rawCourses.map((c, idx) => ({
+        coursesList = (rawCourses as unknown as AppwriteCourse[]).map((c, idx) => ({
           id: idx + 1,
           name: c.course,
           href: `/cuartosemestre/${normalizeString(c.course)}`,
@@ -40,7 +49,7 @@ export default async function CuartoSemestre() {
     }
   }
 
-  const customTopics = topics ? topics.map((t) => ({
+  const customTopics = topics ? (topics as unknown as AppwriteTopic[]).map((t) => ({
     $id: t.$id,
     semester: t.semester,
   })) : undefined;
