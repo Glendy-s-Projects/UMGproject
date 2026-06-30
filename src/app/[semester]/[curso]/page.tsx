@@ -24,6 +24,8 @@ const DynamicCourse = () => {
   const [topicId, setTopicId] = useState<string | null>(null);
   const [loadingCourseName, setLoadingCourseName] = useState<boolean>(true);
 
+  //verificar si funciona el action
+
   useEffect(() => {
     const fetchCourseName = async () => {
       try {
