@@ -1,0 +1,96 @@
+name: PR Check UMG Tools
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  validate-pr-direction:
+    name: Validar dirección del PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar que el flujo de ramas sea correcto
+        run: |
+          BASE="${{ github.base_ref }}"
+          HEAD="${{ github.head_ref }}"
+          echo "Base: $BASE  |  Head: $HEAD"
+
+          # Regla 1: a main solo puede entrar develop
+          if [ "$BASE" = "main" ] && [ "$HEAD" != "develop" ]; then
+            echo ""
+            echo "❌ Estás intentando mergear '$HEAD' directamente a 'main'."
+            echo "   Solo se permite mergear 'develop' -> 'main'."
+            echo "   Revisá el selector 'base' y 'compare' al crear el PR."
+            echo ""
+            exit 1
+          fi
+
+          # Regla 2: a develop no puede entrar main (PR invertido)
+          if [ "$BASE" = "develop" ] && [ "$HEAD" = "main" ]; then
+            echo ""
+            echo "❌ Este PR está invertido: base=develop, compare=main."
+            echo "   Seguramente querías hacer: base=main, compare=develop."
+            echo "   Cerrá este PR y creá uno nuevo con la dirección correcta."
+            echo ""
+            exit 1
+          fi
+
+          echo "✅ Dirección del PR correcta ($HEAD -> $BASE)"
+
+  branch-check:
+    name: Verificar branch is up to date
+    runs-on: ubuntu-latest
+    needs: validate-pr-direction
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Verificar branch is up to date with base branch
+        run: |
+          echo "🔍 Validando que tu rama esté actualizada con ${{ github.base_ref }}..."
+          git fetch origin ${{ github.base_ref }}
+          MERGE_BASE=$(git merge-base ${{ github.event.pull_request.head.sha }} origin/${{ github.base_ref }})
+          BASE_HEAD=$(git rev-parse origin/${{ github.base_ref }})
+          if [ "$MERGE_BASE" != "$BASE_HEAD" ]; then
+            echo ""
+            echo "❌ Tu rama no incluye los últimos cambios de ${{ github.base_ref }}"
+            echo ""
+            echo "📋 Para actualizar tu rama ejecuta:"
+            echo "   git checkout ${{ github.head_ref }}"
+            echo "   git pull origin ${{ github.base_ref }}"
+            echo "   git push"
+            echo ""
+            exit 1
+          fi
+          echo "✅ La rama ${{ github.head_ref }} está actualizada con ${{ github.base_ref }}"
+
+  check:
+    name: Typecheck & Build
+    runs-on: ubuntu-latest
+    needs: validate-pr-direction
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
