@@ -20,7 +20,7 @@ import {
   deleteFile,
   deleteTopic,
   createRecoveryCodes,
-  regenerateRecoveryCodes,
+  //regenerateRecoveryCodes,
   setupTotp,
   verifyTotpSetup,
   enableMfa,
