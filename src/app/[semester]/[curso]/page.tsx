@@ -19,6 +19,8 @@ const DynamicCourse = () => {
   const params = useParams();
   const semesterSlug = decodeURIComponent(params.semester as string);
   const cursoSlug = decodeURIComponent(params.curso as string);
+
+  //TODO: REMOVER ANYS
   
   const [courseName, setCourseName] = useState<string | null>(null);
   const [semesterName, setSemesterName] = useState<string | null>(null);
