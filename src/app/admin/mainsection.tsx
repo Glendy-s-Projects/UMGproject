@@ -23,7 +23,6 @@ interface MainSectionProps {
 
 const Mainsection = ({
   activeTopic,
-  topics,
   editingTopicId,
   setEditingTopicId,
   editTopicName,
