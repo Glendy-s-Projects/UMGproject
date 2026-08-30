@@ -266,14 +266,59 @@ export const SemesterRoutes: SemesterType[] = [
     acronym: "3er",
   },
   {
-    id:4,
+    id: 4,
     name: "Cuarto Semestre",
     mainroute: "/cuartosemestre",
-    routes: [],
+    routes: [
+      {
+        id: 1,
+        name: "Estadística I",
+        href: "/cuartosemestre/estadistica1",
+        bgColor: "bg-blue-300",
+        image: "/estadistica1.webp",
+        hasInteractiveTools: true,
+        subroutes: [
+          {
+            id: 1,
+            name: "Variables Cualitativas y Cuantitativas",
+            href: "/cuartosemestre/estadistica1/variablescualitativascuantitativas",
+          },
+        ],
+        icon: LiaSquareRootAltSolid,
+      },
+      {
+        id: 2,
+        name: "Cálculo 2",
+        href: "/cuartosemestre/calculo2",
+        bgColor: "",
+        image: "",
+      },
+      {
+        id: 3,
+        name: "Física 2",
+        href: "/cuartosemestre/fisica2",
+        bgColor: "",
+        image: "",
+      },
+      {
+        id: 4,
+        name: "Programación II",
+        href: "/cuartosemestre/programacion2",
+        bgColor: "",
+        image: "",
+      },
+      {
+        id: 5,
+        name: "Microeconomia",
+        href: "/cuartosemestre/microeconomia",
+        bgColor: "",
+        image: "",
+      },
+    ],
     image: "/4.webp",
     bgColor: "#a78bfa",
     acronym: "4to",
-  }
+  },
 ];
 
 // Función para obtener todos los cursos de un semestre específico por su ID
@@ -305,6 +350,12 @@ export const Programacion1Slugs = getTemasByCursoId(3, 2); // Semestre 3, Curso 
 export const ProcesoAdministrativoSlugs = getTemasByCursoId(3, 3); // Semestre 3, Curso 3
 export const Calculo1Slugs = getTemasByCursoId(3, 4); // Semestre 3, Curso 4
 export const DerechoInformaticoSlugs = getTemasByCursoId(3, 5); // Semestre 3, Curso 5
+
+export const Estadistica1Slugs = getTemasByCursoId(4, 1); // Semestre 4, Curso 1
+export const Calculo2Slugs = getTemasByCursoId(4, 2); // Semestre 4, Curso 2
+export const Fisica2Slugs = getTemasByCursoId(4, 3); // Semestre 4, Curso 3
+export const Programacion2Slugs = getTemasByCursoId(4, 4); // Semestre 4, Curso 4
+export const MicroeconomiaSlugs = getTemasByCursoId(4, 5); // Semestre 4, Curso 5
 
 // Cursos por semestre
 export const PrimerSemestreCursos = getCursosBySemestreId(1); // ID 2 = Segundo Semestre
