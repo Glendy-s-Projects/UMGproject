@@ -5,6 +5,7 @@ import { getTopics, getCourses } from "../../../lib/appwrite-server";
 import { routetype } from "@/types/index";
 import React from "react";
 import { Models } from "node-appwrite";
+import { CuartoSemestreCursos } from "@/utils/data/routes";
 
 interface AppwriteTopic extends Models.Document {
   semester: string;
@@ -31,35 +32,45 @@ export default async function CuartoSemestre() {
   let topicId = "4";
 
   if (topics) {
-    const topic = (topics as unknown as AppwriteTopic[]).find((t) => normalizeString(t.semester) === normalizeString("Cuarto Semestre"));
+    const topic = (topics as unknown as AppwriteTopic[]).find(
+      (t) => normalizeString(t.semester) === normalizeString("Cuarto Semestre"),
+    );
     if (topic) {
       topicId = topic.$id;
       const rawCourses = await getCourses(topic.$id);
-      
+
       if (rawCourses) {
-        coursesList = (rawCourses as unknown as AppwriteCourse[]).map((c, idx) => ({
-          id: idx + 1,
-          name: c.course,
-          href: `/cuartosemestre/${normalizeString(c.course)}`,
-          bgColor: "bg-surface-container-lowest",
-          image: "",
-          mainroute: "/cuartosemestre"
-        }));
+        coursesList = (rawCourses as unknown as AppwriteCourse[]).map(
+          (c, idx) => ({
+            id: idx + 1,
+            name: c.course,
+            href: `/cuartosemestre/${normalizeString(c.course)}`,
+            bgColor: "bg-surface-container-lowest",
+            image: "",
+            mainroute: "/cuartosemestre",
+          }),
+        );
       }
     }
   }
 
-  const customTopics = topics ? (topics as unknown as AppwriteTopic[]).map((t) => ({
-    $id: t.$id,
-    semester: t.semester,
-  })) : undefined;
+  const customTopics = topics
+    ? (topics as unknown as AppwriteTopic[]).map((t) => ({
+        $id: t.$id,
+        semester: t.semester,
+      }))
+    : undefined;
 
   return (
-    <AppLayout title="Cuarto Semestre" activeTopicId={topicId} customTopics={customTopics}>
+    <AppLayout
+      title="Cuarto Semestre"
+      activeTopicId={topicId}
+      customTopics={customTopics}
+    >
       <section className="min-h-screen flex flex-col items-center gap-2 p-4">
         <div className="max-w-7xl mx-auto w-full">
           <TitleCourse course="Cuarto Semestre" />
-          <Grids mainSemester={coursesList} />
+          <Grids mainSemester={CuartoSemestreCursos} />
         </div>
       </section>
     </AppLayout>
